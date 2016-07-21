@@ -109,7 +109,7 @@
             "moda":'#D92B33',
             "arredo":'#057DC2',
             "pssd":'#F7DE03',
-            "d&e": '#6C89A8',
+            "de": '#6C89A8',
             "ingegneria":'#794099',
             "design":'#FAA819',
             "architettura":'#62AD60',
@@ -217,32 +217,45 @@
                 .style("stroke-width",5)
                 .style("opacity",.9)
                 .on("mouseenter",function(d){
+
+
+
                     d3.selectAll(".kw:not([id])").style("opacity",.3)
-                    d3.selectAll(".kw-txt:not([id])").style("opacity",0)
                     d3.select(this).style("opacity",1)
-                    d3.select(".k"+d.keyword.replace(/ /g,"_")).style("opacity",1)
 
-                    _.forEach(d,function(v,k){
-                        if(v>0 && k in foci) {
+                    var id = d3.select(this).attr("id")
+                    console.log(id);
 
+                    if(id) {
 
-                            $(".info-cats").append("<div style='color:"+cols[k]+"'>"+k+": <span>"+v+"</span></div>");
+                        d3.selectAll(".kw:not([id])").filter(function(e){return e[id]>0}).style("opacity",1)
 
-                            sel.append("line")
-                                    .attr("x1",d3.select("#"+k.replace(/\&/g,"")).attr("cx"))
-                                    .attr("x2",d.x)
-                                    .attr("y1",d3.select("#"+k.replace(/\&/g,"")).attr("cy"))
-                                    .attr("y2",d.y)
-                                    .style("stroke","white")
-                                    .style("stroke-width",function(d){return strscale(v)});
-                        }
-                    })
+                    }
 
+                    else {
 
-                    $(".info h1").text(d.keyword)
-                    $(".info").show();
+                        console.log(d);
 
+                        d3.selectAll(".kw-txt:not([id])").style("opacity",0)
+                        d3.select(".k"+d.keyword.replace(/ /g,"_")).style("opacity",1)
 
+                        _.forEach(d,function(v,k){
+                            if(v>0 && k in foci) {
+
+                                $(".info-cats").append("<div style='color:"+cols[k]+"'>"+k+": <span>"+v+"</span></div>");
+
+                                sel.append("line")
+                                        .attr("x1",d3.select("#"+k.replace(/\&/g,"")).attr("cx"))
+                                        .attr("x2",d.x)
+                                        .attr("y1",d3.select("#"+k.replace(/\&/g,"")).attr("cy"))
+                                        .attr("y2",d.y)
+                                        .style("stroke","white")
+                                        .style("stroke-width",function(d){return strscale(v)});
+                            }
+                        })
+                        $(".info h1").text(d.keyword)
+                        $(".info").show();
+                    }
 
 
                 })
@@ -269,8 +282,13 @@
                 .style("opacity",function(d){return siz(d.tot)>7 ? 1 : 0})
 
                 .style("fill", function(d) { return d.type ? "black" : "white"; })
-                .text(function(d){return d.keyword})
-
+                .text(function(d) {
+                    if (d.keyword === "de") {
+                        console.log(d.keyword);
+                        return "d&e";
+                    }
+                    else return d.keyword;
+                })
 
         txts.filter(function(d){return d.type})
                 .attr("id",function(d){return "txt_"+d.keyword.replace(/\&/g,"")})
