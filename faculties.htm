@@ -1,268 +1,332 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Faculties keywords</title>
 
-    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
-    
+    <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
+
     <style>
-        body{
-            background:black;
+        body {
+            background: #040404;
             overflow: hidden;
         }
-        svg text{
+        
+        svg text {
             pointer-events: none;
-            font-family: "Montserrat";
-            font-size:10px;
+            font-family: "HKGroteskRegular", sans-serif;
+            font-size: 10px;
             text-transform: capitalize;
-
         }
-
-        .info{
-            color:white;
-            font-family:"Montserrat";
-            float:right;
+        
+        .info {
+            color: #fcfff7;
+            font-family: "HKGroteskRegular", sans-serif;
+            float: right;
             position: absolute;
-            height:100%;
-            top:0;
-            right:0;
-            width:300px;
-            min-width:300px;
-            display:none;
+            height: 100%;
+            top: 0;
+            right: 0;
+            width: 300px;
+            min-width: 300px;
+            display: none;
         }
-        .info-cats div span{
-            color:white !important;
+        
+        .info-cats div span {
+            color: #fcfff7 !important;
         }
-
-        .info-cats div{
-            margin-top:5px;
+        
+        .info-cats div {
+            margin-top: 5px;
         }
-        .info-cats{
-            font-size:14px;
-            font-weight:400;
+        
+        .info-cats {
+            font-size: 14px;
+            font-weight: normal;
         }
-
-        .info h1{
-            font-size:16px;
-            margin-top:40px;
+        
+        .info h1 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 40px;
             text-transform: capitalize;
         }
-
+        
         svg text:not(.kw-attractor) {
-            text-shadow: black 0 0 4px;
+            text-shadow: #040404 0 0 4px;
+        }
+        
+        .back-button {
+            bottom: 30px;
+            font-size: 14px;
+            left: 25px;
+            position: fixed;
+        }
+        
+        .back-button a {
+            color: #fcfff7;
+            font-family: "HKGroteskRegular", sans-serif;
+            position: relative;
+            text-decoration: none;
+        }
+        
+        .back-button a::after {
+            border-bottom: 1px solid #fcfff7;
+            content: "";
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            -webkit-transform: scaleX(0);
+            transform: scaleX(0);
+            -webkit-transform-origin: 0 0;
+            transform-origin: 0 0;
+            -webkit-transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transition: all 0.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+            width: 100%;
+            z-index: -1;
+        }
+        
+        .back-button a:hover::after {
+            -webkit-transform: scaleX(1);
+            transform: scaleX(1);
         }
     </style>
 
 </head>
+
 <body>
 
 
-<div class="info">
+    <div class="info">
 
-    <h1></h1>
-    <div class="info-cats">
+        <h1></h1>
+        <div class="info-cats">
+
+        </div>
 
     </div>
 
-</div>
+    <div class="back-button">
+        <a href="../">Torna alla Home</a>
+    </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-
-
-<script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
 
 
-    d3.json('total_kw.json',function(data){
+    <script>
+        d3.json('total_kw.json', function (data) {
 
-        var cats = d3.keys(data[0])
-        _.remove(cats,function(d){return d == 'keyword'});
-        _.remove(cats,function(d){return d == 'tot'});
+            var cats = d3.keys(data[0])
+            _.remove(cats, function (d) {
+                return d == 'keyword'
+            });
+            _.remove(cats, function (d) {
+                return d == 'tot'
+            });
 
 
-        var max = d3.max(data,function(d){return +d.tot});
+            var max = d3.max(data, function (d) {
+                return +d.tot
+            });
 
 
 
 
-        var siz = d3.scaleSqrt()
+            var siz = d3.scaleSqrt()
                 .domain([0, max])
                 .range([0, 16]);
 
 
 
-        var strscale = d3.scaleLinear()
-                .domain([0, max/2])
+            var strscale = d3.scaleLinear()
+                .domain([0, max / 2])
                 .range([0, 10]);
 
-        var width = window.outerWidth,
+            var width = window.outerWidth,
                 height = window.outerHeight;
 
 
-        var cols = {
-            "prodotto":'#794099',
-            "comunicazione":'#FAA819',
-            "interni":'#62AD60',
-            "moda":'#D92B33',
-            "arredo":'#057DC2',
-            "pssd":'#F7DE03',
-            "d&e": '#6C89A8',
-            "ingegneria":'#794099',
-            "design":'#FAA819',
-            "architettura":'#62AD60',
+            var cols = {
+                "prodotto": '#a456b2',
+                "comunicazione": '#f9941c',
+                "interni": '#6cba91',
+                "moda": '#dd3a56',
+                "arredo": '#057DC2',
+                "pssd": '#f7ec2f',
+                "de": '#31acbc',
+                "ingegneria": '#247ba0',
+                "design": '#ff1654',
+                "architettura": '#c3e165',
 
-        }
+            }
 
-        var foci = {}
-        var center = [width/2, height/2];
-        var rad = (width/2)*.4;
+            var foci = {}
+            var center = [width / 2, height / 2];
+            var rad = (width / 2) * .4;
 
-        var color = d3.schemeCategory10;
+            var color = d3.schemeCategory10;
 
-        cats.forEach(function(d,i){
-            foci[d] = [center[0]+rad*Math.cos(2*Math.PI * (i/cats.length)),center[1]+rad*Math.sin(2*Math.PI * (i/cats.length))]
-        })
+            cats.forEach(function (d, i) {
+                foci[d] = [center[0] + rad * Math.cos(2 * Math.PI * (i / cats.length)), center[1] + rad * Math.sin(2 * Math.PI * (i / cats.length))]
+            })
 
-        data.forEach(function(d){
-            var upx = 0;
-            var upy = 0;
-            var down = 0;
+            data.forEach(function (d) {
+                var upx = 0;
+                var upy = 0;
+                var down = 0;
 
-            var colr = 0;
-            var colg = 0;
-            var colb = 0;
+                var colr = 0;
+                var colg = 0;
+                var colb = 0;
 
-            d3.keys(foci).forEach(function(e,i){
-                upx += parseFloat(d[e]/d.tot) * foci[e][0];
-                upy += parseFloat(d[e]/d.tot) * foci[e][1];
-                colr += parseFloat(d[e]/d.tot) * d3.color(cols[e]).r;
-                colg += parseFloat(d[e]/d.tot) * d3.color(cols[e]).g;
-                colb += parseFloat(d[e]/d.tot) * d3.color(cols[e]).b;
-                down += parseFloat(d[e]/d.tot);
+                d3.keys(foci).forEach(function (e, i) {
+                    upx += parseFloat(d[e] / d.tot) * foci[e][0];
+                    upy += parseFloat(d[e] / d.tot) * foci[e][1];
+                    colr += parseFloat(d[e] / d.tot) * d3.color(cols[e]).r;
+                    colg += parseFloat(d[e] / d.tot) * d3.color(cols[e]).g;
+                    colb += parseFloat(d[e] / d.tot) * d3.color(cols[e]).b;
+                    down += parseFloat(d[e] / d.tot);
+                })
+
+
+                d.destx = upx / down;
+                d.desty = upy / down;
+                d.color = d3.rgb(colr, colg, colb);
             })
 
 
-            d.destx = upx/down;
-            d.desty = upy/down;
-            d.color = d3.rgb(colr,colg,colb);
-        })
-
-
-        _.forEach(foci,function(v,k){
-            data.push({
-                keyword:k,
-                type:"focus",
-                destx:v[0],
-                desty:v[1],
-                tot:1900,
-                color:"white"
+            _.forEach(foci, function (v, k) {
+                data.push({
+                    keyword: k,
+                    type: "focus",
+                    destx: v[0],
+                    desty: v[1],
+                    tot: 1900,
+                    color: "#fcfff7"
+                })
             })
-        })
 
-        var nodes = data;
+            var nodes = data;
 
-        var simulation = d3.forceSimulation()
-                .force("x", d3.forceX().strength(.2).x(function(d){return d.destx}))
-                .force("y", d3.forceY().strength(.2).y(function(d){return d.desty}))
+            var simulation = d3.forceSimulation()
+                .force("x", d3.forceX().strength(.2).x(function (d) {
+                    return d.destx
+                }))
+                .force("y", d3.forceY().strength(.2).y(function (d) {
+                    return d.desty
+                }))
                 .force("charge", d3.forceManyBody().strength(-5))
-                .force("collide", d3.forceCollide().radius(function(d) { return siz(d.tot) + 1 }).iterations(2))
-                .force("center", d3.forceCenter(width / 2, height/2 - 20));
+                .force("collide", d3.forceCollide().radius(function (d) {
+                    return siz(d.tot) + 1
+                }).iterations(2))
+                .force("center", d3.forceCenter(width / 2, height / 2 - 20));
 
 
-        simulation
+            simulation
                 .nodes(nodes)
                 .on("tick", ticked);
 
 
-        var svg = d3.select("body").append("svg")
+            var svg = d3.select("body").append("svg")
                 .attr("width", width)
                 .attr("height", height);
 
 
-        var g = svg.append("g")
-                .attr("class","g")
+            var g = svg.append("g")
+                .attr("class", "g")
                 .style("pointer-events", "all")
                 .call(d3.zoom()
-                        .scaleExtent([1 / 2, 4])
-                        .on("zoom", zoomed));
+                    .scaleExtent([1 / 2, 4])
+                    .on("zoom", zoomed));
 
 
-        g.append("rect")
+            g.append("rect")
                 .attr("width", width)
                 .attr("height", height)
                 .style("fill", "none")
 
-        var sel = g.append("g")
-                .attr("class","sel");
+            var sel = g.append("g")
+                .attr("class", "sel");
 
 
 
-        function zoomed() {
-            g.attr("transform", d3.event.transform);
-        }
+            function zoomed() {
+                g.attr("transform", d3.event.transform);
+            }
 
 
-        node = g.selectAll(".kw")
+            node = g.selectAll(".kw")
                 .data(nodes)
                 .enter().append("circle")
-                .attr("class","kw")
+                .attr("class", "kw")
 
 
-                .attr("r", function(d) { return siz(d.tot); })
-                .style("fill", function(d) { return d.color; })
-                .style("stroke",function(d,i){ return d.type ? cols[d.keyword] : "none"})
-                .style("stroke-width",5)
-                .style("opacity",.9)
-                .on("mouseenter",function(d){
+            .attr("r", function (d) {
+                    return siz(d.tot);
+                })
+                .style("fill", function (d) {
+                    return d.color;
+                })
+                .style("stroke", function (d, i) {
+                    return d.type ? cols[d.keyword] : "none"
+                })
+                .style("stroke-width", 5)
+                .style("opacity", .9)
+                .on("mouseenter", function (d) {
 
 
                     console.log(d.keyword)
 
-                    d3.selectAll(".kw:not([id])").style("opacity",.3)
-                    d3.select(this).style("opacity",1)
+                    d3.selectAll(".kw:not([id])").style("opacity", .3)
+                    d3.select(this).style("opacity", 1)
 
                     var id = d3.select(this).attr("id")
 
-                   if(id) {
+                    if (id) {
 
-                       d3.selectAll(".kw:not([id])").filter(function(e){return e[id]>0}).style("opacity",1)
+                        d3.selectAll(".kw:not([id])").filter(function (e) {
+                            return e[id] > 0
+                        }).style("opacity", 1)
 
-                   }
+                    } else {
 
-                    else {
+                        d3.selectAll(".kw-txt:not([id])").style("opacity", 0)
+                        d3.select(".k" + d.keyword.replace(/ /g, "_")).style("opacity", 1)
 
-                       d3.selectAll(".kw-txt:not([id])").style("opacity",0)
-                       d3.select(".k"+d.keyword.replace(/ /g,"_")).style("opacity",1)
+                        _.forEach(d, function (v, k) {
+                            if (v > 0 && k in foci) {
 
-                       _.forEach(d,function(v,k){
-                           if(v>0 && k in foci) {
+                                $(".info-cats").append("<div style='color:" + cols[k] + "'>" + k + ": <span>" + v + "</span></div>");
 
-                               $(".info-cats").append("<div style='color:"+cols[k]+"'>"+k+": <span>"+v+"</span></div>");
-
-                               sel.append("line")
-                                       .attr("x1",d3.select("#"+k.replace(/\&/g,"")).attr("cx"))
-                                       .attr("x2",d.x)
-                                       .attr("y1",d3.select("#"+k.replace(/\&/g,"")).attr("cy"))
-                                       .attr("y2",d.y)
-                                       .style("stroke","white")
-                                       .style("stroke-width",function(d){return strscale(v)});
-                           }
-                       })
-                       $(".info h1").text(d.keyword)
-                       $(".info").show();
-                   }
+                                sel.append("line")
+                                    .attr("x1", d3.select("#" + k.replace(/\&/g, "")).attr("cx"))
+                                    .attr("x2", d.x)
+                                    .attr("y1", d3.select("#" + k.replace(/\&/g, "")).attr("cy"))
+                                    .attr("y2", d.y)
+                                    .style("stroke", "#fcfff7")
+                                    .style("stroke-width", function (d) {
+                                        return strscale(v)
+                                    });
+                            }
+                        })
+                        $(".info h1").text(d.keyword)
+                        $(".info").show();
+                    }
 
 
 
 
 
                 })
-                .on("mouseleave",function(d){
-                    d3.selectAll(".kw").style("opacity",.9)
-                    d3.selectAll(".kw-txt").style("opacity",function(d){return siz(d.tot)>8 ? 1 : 0})
-                    //d3.select("."+d.keyword.replace(/ /g,"_")).style("opacity",function(d){return siz(d.tot)>8 ? 1 : 0})
+                .on("mouseleave", function (d) {
+                    d3.selectAll(".kw").style("opacity", .9)
+                    d3.selectAll(".kw-txt").style("opacity", function (d) {
+                            return siz(d.tot) > 8 ? 1 : 0
+                        })
+                        //d3.select("."+d.keyword.replace(/ /g,"_")).style("opacity",function(d){return siz(d.tot)>8 ? 1 : 0})
                     d3.select(".sel").selectAll("*").remove();
                     $(".info").hide();
                     $(".info-cats").empty();
@@ -270,44 +334,67 @@
 
 
 
-        node.filter(function(d){return d.type})
-                .attr("id",function(d){return d.keyword.replace(/\&/g,"")});
+            node.filter(function (d) {
+                    return d.type
+                })
+                .attr("id", function (d) {
+                    return d.keyword.replace(/\&/g, "")
+                });
 
 
-        txts = g.selectAll(".kw-txt").data(nodes)
+            txts = g.selectAll(".kw-txt").data(nodes)
                 .enter().append("text")
-                .attr("class",function(d){return d.type ? "kw-txt kw-attractor" : "kw-txt k"+d.keyword.replace(/ /g,"_")})
-                .attr("text-anchor",function(d){return d.type ? "middle" : "left"})
-                .attr("dy",6)
-                .style("opacity",function(d){return siz(d.tot)>8 ? 1 : 0})
-                .style("fill", function(d) { return d.type ? "black" : "white"; })
-                .text(function(d) {
+                .attr("class", function (d) {
+                    return d.type ? "kw-txt kw-attractor" : "kw-txt k" + d.keyword.replace(/ /g, "_")
+                })
+                .attr("text-anchor", function (d) {
+                    return d.type ? "middle" : "left"
+                })
+                .attr("dy", 6)
+                .style("opacity", function (d) {
+                    return siz(d.tot) > 8 ? 1 : 0
+                })
+                .style("fill", function (d) {
+                    return d.type ? "#040404" : "#fcfff7";
+                })
+                .text(function (d) {
                     if (d.keyword === "de") {
                         console.log(d.keyword);
                         return "d&e";
-                    }
-                    else return d.keyword;
+                    } else return d.keyword;
                 })
 
-        txts.filter(function(d){return d.type})
-                .attr("id",function(d){return "txt_"+d.keyword.replace(/\&/g,"")})
+            txts.filter(function (d) {
+                    return d.type
+                })
+                .attr("id", function (d) {
+                    return "txt_" + d.keyword.replace(/\&/g, "")
+                })
 
 
-        function ticked() {
+            function ticked() {
 
-            node
-                    .attr("cx", function(d) { return d.x})
-                    .attr("cy", function(d) { return d.y});
+                node
+                    .attr("cx", function (d) {
+                        return d.x
+                    })
+                    .attr("cy", function (d) {
+                        return d.y
+                    });
 
-            txts
-                    .attr("x", function(d) { return d.type ? d.x : d.x + siz(d.tot) + 4; })
-                    .attr("y", function(d) { return d.type ? d.y : d.y; + siz(d.tot) + 4});
+                txts
+                    .attr("x", function (d) {
+                        return d.type ? d.x : d.x + siz(d.tot) + 4;
+                    })
+                    .attr("y", function (d) {
+                        return d.type ? d.y : d.y; + siz(d.tot) + 4
+                    });
 
-        }
-    });
-
-</script>
+            }
+        });
+    </script>
 
 
 </body>
+
 </html>
