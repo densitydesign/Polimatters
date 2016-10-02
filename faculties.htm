@@ -6,6 +6,8 @@
 
     <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
 
+    <link rel="stylesheet" media="screen" href="js/jquery-ui.min.css" type="text/css">
+
     <style>
         body {
             background: #040404;
@@ -29,7 +31,7 @@
             right: 0;
             width: 300px;
             min-width: 300px;
-            display: none;
+
         }
         
         .info-cats div span {
@@ -91,6 +93,17 @@
             -webkit-transform: scaleX(1);
             transform: scaleX(1);
         }
+
+        .search label{
+            display:block;
+            margin-top:40px;
+            margin-bottom:10px;
+
+        }
+
+        .curr-key{
+            display:none;
+        }
     </style>
 
 </head>
@@ -98,11 +111,20 @@
 <body>
 
 
+
+    </div>
     <div class="info">
 
+        <div class="search">
+            <label>Look for a specific keyword</label>
+            <input id="searchbox" type="text">
+        </div>
+
+        <div class="curr-key">
         <h1></h1>
         <div class="info-cats">
 
+        </div>
         </div>
 
     </div>
@@ -114,6 +136,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
 
 
     <script>
@@ -275,62 +298,10 @@
                 })
                 .style("stroke-width", 5)
                 .style("opacity", .9)
-                .on("mouseenter", function (d) {
+                .on("mouseenter", mouseEnter)
+                .on("mouseleave",mouseLeave);
 
 
-                    console.log(d.keyword)
-
-                    d3.selectAll(".kw:not([id])").style("opacity", .3)
-                    d3.select(this).style("opacity", 1)
-
-                    var id = d3.select(this).attr("id")
-
-                    if (id) {
-
-                        d3.selectAll(".kw:not([id])").filter(function (e) {
-                            return e[id] > 0
-                        }).style("opacity", 1)
-
-                    } else {
-
-                        d3.selectAll(".kw-txt:not([id])").style("opacity", 0)
-                        d3.select(".k" + d.keyword.replace(/ /g, "_")).style("opacity", 1)
-
-                        _.forEach(d, function (v, k) {
-                            if (v > 0 && k in foci) {
-
-                                $(".info-cats").append("<div style='color:" + cols[k] + "'>" + k + ": <span>" + v + "</span></div>");
-
-                                sel.append("line")
-                                    .attr("x1", d3.select("#" + k.replace(/\&/g, "")).attr("cx"))
-                                    .attr("x2", d.x)
-                                    .attr("y1", d3.select("#" + k.replace(/\&/g, "")).attr("cy"))
-                                    .attr("y2", d.y)
-                                    .style("stroke", "#fcfff7")
-                                    .style("stroke-width", function (d) {
-                                        return strscale(v)
-                                    });
-                            }
-                        })
-                        $(".info h1").text(d.keyword)
-                        $(".info").show();
-                    }
-
-
-
-
-
-                })
-                .on("mouseleave", function (d) {
-                    d3.selectAll(".kw").style("opacity", .9)
-                    d3.selectAll(".kw-txt").style("opacity", function (d) {
-                            return siz(d.tot) > 8 ? 1 : 0
-                        })
-                        //d3.select("."+d.keyword.replace(/ /g,"_")).style("opacity",function(d){return siz(d.tot)>8 ? 1 : 0})
-                    d3.select(".sel").selectAll("*").remove();
-                    $(".info").hide();
-                    $(".info-cats").empty();
-                })
 
 
 
@@ -391,8 +362,76 @@
                     });
 
             }
-        });
-    </script>
+
+
+            function mouseEnter(d) {
+                mouseLeave();
+
+                var id = d3.select(this).attr("id")
+                console.log(id);
+
+                if (id) {
+
+                    d3.selectAll(".kw:not([id])").filter(function (e) {
+                        return e[id] > 0
+                    }).style("opacity", 1)
+
+                } else {
+
+                    console.log(d);
+
+                    d3.selectAll(".kw-txt:not([id])").style("opacity", 0)
+                    d3.select(".k" + d.keyword.replace(/ /g, "_")).style("opacity", 1)
+
+                    _.forEach(d, function (v, k) {
+                        if (v > 0 && k in foci) {
+
+                            $(".info-cats").append("<div style='color:" + cols[k] + "'>" + k + ": <span>" + v + "</span></div>");
+
+                            sel.append("line")
+                                    .attr("x1", d3.select("#" + k.replace(/\&/g, "")).attr("cx"))
+                                    .attr("x2", d.x)
+                                    .attr("y1", d3.select("#" + k.replace(/\&/g, "")).attr("cy"))
+                                    .attr("y2", d.y)
+                                    .style("stroke", "#fcfff7")
+                                    .style("stroke-width", function (d) {
+                                        return strscale(v)
+                                    });
+                        }
+                    })
+                    $(".curr-key h1").text(d.keyword)
+                    $(".curr-key").show();
+                }
+
+
+                d3.selectAll(".kw:not([id])").style("opacity", .3)
+                d3.select(this).style("opacity", 1)
+
+            }
+
+            function mouseLeave(d) {
+                d3.selectAll(".kw").style("opacity", .9)
+                d3.selectAll(".kw-txt").style("opacity", function (d) {
+                    return siz(d.tot) > 8 ? 1 : 0
+                })
+                //d3.select("."+d.keyword.replace(/ /g,"_")).style("opacity",function(d){return siz(d.tot)>8 ? 1 : 0})
+                d3.select(".sel").selectAll("*").remove();
+                $(".curr-key").hide();
+                $(".info-cats").empty();
+            }
+
+            $( "#searchbox" ).autocomplete({
+                source: _.map(nodes,"keyword"),
+                select: function( event, ui ) {
+
+
+                    d3.selectAll(".kw")
+                        .filter(function(d){return d.keyword == ui.item.label})
+                        .each(mouseEnter)}
+            });
+    });
+
+</script>
 
 
 </body>
