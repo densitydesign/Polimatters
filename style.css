@@ -185,15 +185,18 @@ a:hover + .long::after,
     font-size: 1em;
 }
 
-.paolo {
+.paolo,
+.keywords {
     color: #c3e165;
 }
 
-.daniele {
+.daniele,
+.theses {
     color: #247ba0;
 }
 
-.michele {
+.michele,
+.years {
     color: #ff1654;
 }
 
