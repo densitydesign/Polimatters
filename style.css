@@ -4,6 +4,10 @@ body {
     position: relative;
 }
 
+a {
+  outline: 0;
+}
+
 .copy {
     font-family: "Lora", serif;
 }
@@ -50,6 +54,7 @@ body {
 }
 
 .header-img {
+    cursor: pointer;
     height: auto;
     width: 30%;
 }
@@ -108,6 +113,7 @@ body {
     z-index: -1;
 }
 
+a:hover + .header-button::before,
 .header-button:hover::before {
     -webkit-transform: scaleX(1);
     transform: scaleX(1);
@@ -131,6 +137,7 @@ body {
     z-index: -1;
 }
 
+a:hover + .long::after,
 .long:hover::after {
     -webkit-transform: scaleX(1);
     transform: scaleX(1);
