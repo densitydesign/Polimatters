@@ -135,9 +135,6 @@
 
 <body>
 
-
-
-    </div>
     <div class="info">
 
         <div class="search">
@@ -279,15 +276,16 @@
 
             var svg = d3.select("body").append("svg")
                 .attr("width", width)
-                .attr("height", height);
+                .attr("height", height)
+                .call(d3.zoom()
+                    .scaleExtent([1 / 2, 4])
+                    .on("zoom", zoomed));
+
 
 
             var g = svg.append("g")
                 .attr("class", "g")
-                .style("pointer-events", "all")
-                .call(d3.zoom()
-                    .scaleExtent([1 / 2, 4])
-                    .on("zoom", zoomed));
+                .style("pointer-events", "all");
 
 
             g.append("rect")
