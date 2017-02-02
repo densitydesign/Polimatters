@@ -260,15 +260,14 @@
 
         var svg = d3.select("body").append("svg")
             .attr("width", width)
-            .attr("height", height);
-
-
-        var g = svg.append("g")
-            .attr("class", "g")
-            .style("pointer-events", "all")
+            .attr("height", height)
             .call(d3.zoom()
                 .scaleExtent([1 / 2, 4])
                 .on("zoom", zoomed));
+
+        var g = svg.append("g")
+            .attr("class", "g")
+            .style("pointer-events", "all");
 
 
         g.append("rect")
