@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Faculties keywords</title>
+
+    <!-- Social Networks meta tags -->
+    <meta property="og:title" content="Polimatters: The Three Macro Areas - Architecture, Design, Engineering">
+    <meta property="og:description" content="We collected and visualized the top 500 keywords of the 20.277 master theses discussed between 2010 and 2016 at Politecnico di Milano for the three faculties: Architecture, Design, Engineering">
+    <meta property="og:image" content="http://labs.densitydesign.org/conferenza2016/img/faculties-keywords.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@densitydesign">
+    <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
+    <link rel="stylesheet" media="screen" href="js/jquery-ui.min.css" type="text/css">
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml" sizes="32x32">
+    <link rel="icon" href="img/favicon.png" type="image/gif" sizes="32x32">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
+
+    <script>
+      // Initialize Firebase
+      let config = {
+        apiKey: "AIzaSyAFAboe9Mj0nyMAo5Jk0iQH3ZKB8KS3z-s",
+        authDomain: "poliparser.firebaseapp.com",
+        databaseURL: "https://poliparser.firebaseio.com",
+        projectId: "poliparser",
+        storageBucket: "poliparser.appspot.com",
+        messagingSenderId: "891756668485"
+      };
+      firebase.initializeApp(config);
+    </script>
+
+    <!-- <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-5816319-6', 'auto');
+      ga('send', 'pageview');
+
+    </script> -->
+
+</head>
+
+<body>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script>
+
+    let center = [window.outerWidth / 2, window.outerHeight / 2];
+    let colors = {
+      "engineering": "#00FFCB",
+      "architecture": "#E8E200",
+      "design": "#6900EC",
+      "xyz": "#FF5000"
+    };
+
+    let faculties = [
+      "architecture",
+      "engineering",
+      "design",
+      "xyz"
+    ];
+
+    let architecture = [
+      "architettura",
+      "architettura - architettura delle costruzioni",
+      "architettura - progettazione architettonica",
+      "gestione del costruito",
+      "pianificazione urbana e politiche territoriali",
+      "pianificazione territoriale urbanistica e ambientale"
+    ];
+
+    let design = [
+      "design & engineering",
+      "design degli interni (interior design)",
+      "design del prodotto per l'innovazione",
+      "design del sistema prodotto (product service system design)",
+      "design dell'arredo (furniture design)",
+      "design della comunicazione",
+      "design della comunicazione (communication design)",
+      "design della moda (fashion design)",
+      "design per il sistema moda",
+      "disegno industriale",
+      "disegno industriale (industrial design)",
+      "interior design",
+      "progetto e ingegnerizzazione del prodotto industriale (design & engineering)",
+      "product service system design"
+    ];
+
+    let engineering = [
+      "ingegneria meccanica",
+      "ingegneria chimica",
+      "ingegneria aeronautica",
+      "biomedical engineering - ingegneria biomedica",
+      "civil engineering for risk mitigation",
+      "computer science and engineering - ingegneria informatica",
+      "environmental and geomatic engineering",
+      "ingegneria aeronautica",
+      "ingegneria aerospaziale",
+      "ingegneria biomedica",
+      "ingegneria chimica",
+      "ingegneria civile",
+      "ingegneria civile - civil engineering",
+      "ingegneria dei materiali",
+      "ingegneria dei sistemi edilizi",
+      "ingegneria dell'automazione",
+      "ingegneria della prevenzione e della sicurezza nell'industria di processo",
+      "ingegneria delle telecomunicazioni",
+      "ingegneria edile",
+      "ingegneria edile - architettura",
+      "ingegneria elettrica",
+      "ingegneria elettronica",
+      "ingegneria energetica",
+      "ingegneria fisica",
+      "ingegneria gestionale",
+      "ingegneria informatica",
+      "ingegneria matematica",
+      "ingegneria meccanica",
+      "ingegneria nucleare",
+      "ingegneria per l'ambiente e il territorio",
+      "ingegneria per l'ambiente e il territorio - environmental and land planning engineering",
+      "ingegneria spaziale",
+      "management engineering - ingegneria gestionale",
+      "materials engineering and nanotechnology",
+      "materials engineering and nanotechnology - ingegneria dei materiali e delle nanotecnologie",
+      "mechanical engineering - ingegneria meccanica",
+      "telecommunication engineering - ingegneria delle telecomunicazioni"
+    ];
+
+    let facultyNodes = {};
+    let keywords = [];
+    let radius = (window.outerWidth / 2) * .7;
+    let size = null;
+    let total = 0;
+
+    // Fetch data
+    firebase.database().ref('/keywords').once('value', snapshot => {
+      snapshot.forEach(keyword => {
+        var word = keyword.val();
+        word.keyword = keyword.key;
+        word.total = Math.random() * 500 + 100;
+        keywords.push(word);
+        // Calculate total number of keywords
+        total += keyword.val().total;
+      });
+    }).then(v => {
+      // TODO remove this
+      total = 5000;
+
+      size = d3.scaleSqrt()
+        .domain([0, total])
+        .range([0, 16]);
+
+      // Faculties circles
+      faculties.forEach(function(faculty, index) {
+        facultyNodes[faculty] = [center[0] + radius * Math.cos(2 * Math.PI * (index / faculties.length)), center[1] + radius * Math.sin(2 * Math.PI * (index / faculties.length))]
+      });
+
+      keywords.forEach(function(keyword, index) {
+        let upX = 0;
+        let upY = 0;
+        let down = 0;
+        let colorRed = 0;
+        let colorGreen = 0;
+        let colorBlue = 0;
+
+        d3.keys(facultyNodes).forEach(function(faculty, index) {
+          var keys = Object.keys(keyword);
+
+          // Figure out faculties a keyword belongs to
+          architecture.forEach(function(course, index) {
+            var multiplier = parseFloat(keyword[course] / keyword.total);
+            if (_.includes(keys, course)) {
+              keyword.total = Math.random() * 70;
+              upX += multiplier * facultyNodes[faculty][0]; // X
+              upY += multiplier * facultyNodes[faculty][1]; // Y
+              colorRed += multiplier * d3.color(colors[faculty]).r;
+              colorGreen += multiplier * d3.color(colors[faculty]).g;
+              colorBlue += multiplier * d3.color(colors[faculty]).b;
+              down += multiplier;
+              keyword.architecture = keyword.architecture + keyword.total;
+            }
+          });
+
+          design.forEach(function(course, index) {
+            var multiplier = parseFloat(keyword[course] / keyword.total);
+            if (_.includes(keys, course)) {
+              keyword.total = Math.random() * 70;
+              upX += multiplier * facultyNodes[faculty][0]; // X
+              upY += multiplier * facultyNodes[faculty][1]; // Y
+              colorRed += multiplier * d3.color(colors[faculty]).r;
+              colorGreen += multiplier * d3.color(colors[faculty]).g;
+              colorBlue += multiplier * d3.color(colors[faculty]).b;
+              down += multiplier;
+              keyword.design = keyword.design + keyword.total;
+            }
+          });
+
+          engineering.forEach(function(course, index) {
+            var multiplier = parseFloat(keyword[course] / keyword.total);
+            if (_.includes(keys, course)) {
+              keyword.total = Math.random() * 70;
+              upX += multiplier * facultyNodes[faculty][0]; // X
+              upY += multiplier * facultyNodes[faculty][1]; // Y
+              colorRed += multiplier * d3.color(colors[faculty]).r;
+              colorGreen += multiplier * d3.color(colors[faculty]).g;
+              colorBlue += multiplier * d3.color(colors[faculty]).b;
+              down += multiplier;
+              keyword.engineering = keyword.engineering + keyword.total;
+            }
+          });
+        });
+
+        keyword.positionX = upX / down;
+        keyword.positionY = upY / down;
+
+        let testRed = 255;
+        let testGreen = 150;
+        let testBlue = 25;
+
+        // let color = d3.rgb(testRed, testGreen, testBlue);
+
+        let color = d3.rgb(colorRed, colorGreen, colorBlue);
+        let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center[0], 2) + Math.pow(keyword.positionY - center[1], 2));
+
+        keyword.color = color.brighter(lightness / 0.0035);
+
+        console.log(keyword.color);
+        console.log(color);
+        console.log(lightness);
+
+        // keyword.color = color;
+      });
+
+      _.forEach(facultyNodes, function(value, key) {
+        // Push the faculty nodes into the set of keywords (so that they can be mapped together)
+        keywords.push({
+          keyword: key,
+          type: "focus",
+          positionX: value[0],
+          positionY: value[1],
+          total: 100, // TODO To be calculated dynamically with a coefficient to scale.
+          color: colors[key]
+        });
+      });
+
+      var bubbles = keywords;
+
+      var simulation = d3.forceSimulation()
+        .force("x", d3.forceX().strength(.2).x(function(bubble) {
+            return bubble.positionX;
+        }))
+        .force("y", d3.forceY().strength(.2).y(function(bubble) {
+            return bubble.positionY;
+        }))
+        .force("charge", d3.forceManyBody().strength(-5))
+        .force("collide", d3.forceCollide().radius(function(bubble) {
+            return size(bubble.total) + 1;
+        }).iterations(2))
+        .force("center", d3.forceCenter(window.outerWidth / 2, window.outerHeight / 2 - 20));
+
+      simulation
+        .nodes(bubbles)
+        .on("tick", ticked);
+
+      let svg = d3.select("body").append("svg")
+          .attr("width", window.outerWidth)
+          .attr("height", window.outerHeight)
+          .call(d3.zoom()
+              .scaleExtent([1 / 2, 4]));
+
+      let g = svg.append("g")
+          .attr("class", "g");
+
+      var bubble = g.selectAll(".keyword")
+          .data(bubbles)
+          .enter().append("circle")
+          .attr("class", "keyword")
+          .attr("r", function(bubble) {
+              return size(bubble.total) * 20;
+            })
+            .style("fill", function(bubble) {
+              return bubble.color;
+            });
+
+      function ticked() {
+        bubble
+          .attr("cx", function(bubble) {
+            return bubble.positionX;
+          })
+          .attr("cy", function(bubble) {
+            return bubble.positionY;
+          });
+      }
+    });
+    </script>
+</body>
+
+</html>
