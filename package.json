@@ -1,0 +1,22 @@
+{
+  "name": "polimatters",
+  "version": "0.2.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vathsav/polimatters.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vathsav/polimatters/issues"
+  },
+  "homepage": "https://github.com/vathsav/polimatters#readme",
+  "dependencies": {
+    "bootstrap-slider": "^9.7.2"
+  }
+}

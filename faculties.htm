@@ -52,6 +52,8 @@
     <script>
     d3.json('total_kw.json', function(data) {
 
+
+
         var cats = d3.keys(data[0])
         _.remove(cats, function(d) {
             return d == 'keyword'
@@ -99,7 +101,6 @@
         })
 
         data.forEach(function(d) {
-
             var upx = 0;
             var upy = 0;
             var down = 0;
@@ -107,6 +108,8 @@
             var colr = 0;
             var colg = 0;
             var colb = 0;
+
+            console.log(d);
 
             d3.keys(foci).forEach(function(e, i) {
                 upx += parseFloat(d[e] / d.tot) * foci[e][0];
@@ -117,11 +120,11 @@
                 down += parseFloat(d[e] / d.tot);
             })
 
-
             d.destx = upx / down;
             d.desty = upy / down;
             d.color = d3.rgb(colr, colg, colb);
         })
+
 
         _.forEach(foci, function(v, k) {
             data.push({
@@ -129,14 +132,12 @@
                 type: "focus",
                 destx: v[0],
                 desty: v[1],
-                tot: 2900,
+                tot: 1900,
                 color: "#fcfff7"
             })
         })
 
         var nodes = data;
-
-        console.log(nodes);
 
         var simulation = d3.forceSimulation()
             .force("x", d3.forceX().strength(.2).x(function(d) {
@@ -151,37 +152,43 @@
             }).iterations(2))
             .force("center", d3.forceCenter(width / 2, height / 2 - 20));
 
+
         simulation
             .nodes(nodes)
             .on("tick", ticked);
+
 
         var svg = d3.select("body").append("svg")
             .attr("width", width)
             .attr("height", height)
             .call(d3.zoom()
-                .scaleExtent([1 / 2, 4]));
-                // .on("zoom", zoomed));
+                .scaleExtent([1 / 2, 4])
+                .on("zoom", zoomed));
 
         var g = svg.append("g")
             .attr("class", "g")
-            // .style("pointer-events", "all");
+            .style("pointer-events", "all");
 
-        // g.append("rect")
-        //     .attr("width", width)
-        //     .attr("height", height)
-        //     .style("fill", "none")
+        g.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
 
-        // var sel = g.append("g")
-        //     .attr("class", "sel");
+        var sel = g.append("g")
+            .attr("class", "sel");
 
-        // function zoomed() {
-        //     g.attr("transform", d3.event.transform);
-        // }
+
+
+        function zoomed() {
+            g.attr("transform", d3.event.transform);
+        }
+
 
         node = g.selectAll(".kw")
             .data(nodes)
             .enter().append("circle")
             .attr("class", "kw")
+
 
         .attr("r", function(d) {
                 return siz(d.tot);
@@ -189,51 +196,54 @@
             .style("fill", function(d) {
                 return d.color;
             })
-            // .style("stroke", function(d, i) {
-            //     return d.type ? cols[d.keyword] : "none"
-            // })
-            // .style("stroke-width", 5)
-            // .style("opacity", .9)
-            // .on("mouseenter", mouseEnter)
-            // .on("mouseleave", mouseLeave);
-
-        //
-        // node.filter(function(d) {
-        //         return d.type
-        //     })
-        //     .attr("id", function(d) {
-        //         return d.keyword.replace(/\&/g, "")
-        //     });
+            .style("stroke", function(d, i) {
+                return d.type ? cols[d.keyword] : "none"
+            })
+            .style("stroke-width", 5)
+            .style("opacity", .9)
+            .on("mouseenter", mouseEnter)
+            .on("mouseleave", mouseLeave);
 
 
-        // txts = g.selectAll(".kw-txt").data(nodes)
-        //     .enter().append("text")
-        //     .attr("class", function(d) {
-        //         return d.type ? "kw-txt kw-attractor" : "kw-txt k" + d.keyword.replace(/ /g, "_")
-        //     })
-        //     .attr("text-anchor", function(d) {
-        //         return d.type ? "middle" : "left"
-        //     })
-        //     .attr("dy", 6)
-        //     .style("opacity", function(d) {
-        //         return siz(d.tot) > 8 ? 1 : 0
-        //     })
-        //     .style("fill", function(d) {
-        //         return d.type ? "#040404" : "#fcfff7";
-        //     })
-        //     .text(function(d) {
-        //         if (d.keyword === "de") {
-        //             console.log(d.keyword);
-        //             return "d&e";
-        //         } else return d.keyword;
-        //     })
 
-        // txts.filter(function(d) {
-        //         return d.type
-        //     })
-        //     .attr("id", function(d) {
-        //         return "txt_" + d.keyword.replace(/\&/g, "")
-        //     })
+
+
+        node.filter(function(d) {
+                return d.type
+            })
+            .attr("id", function(d) {
+                return d.keyword.replace(/\&/g, "")
+            });
+
+
+        txts = g.selectAll(".kw-txt").data(nodes)
+            .enter().append("text")
+            .attr("class", function(d) {
+                return d.type ? "kw-txt kw-attractor" : "kw-txt k" + d.keyword.replace(/ /g, "_")
+            })
+            .attr("text-anchor", function(d) {
+                return d.type ? "middle" : "left"
+            })
+            .attr("dy", 6)
+            .style("opacity", function(d) {
+                return siz(d.tot) > 8 ? 1 : 0
+            })
+            .style("fill", function(d) {
+                return d.type ? "#040404" : "#fcfff7";
+            })
+            .text(function(d) {
+                if (d.keyword === "de") {
+                    console.log(d.keyword);
+                    return "d&e";
+                } else return d.keyword;
+            })
+
+        txts.filter(function(d) {
+                return d.type
+            })
+            .attr("id", function(d) {
+                return "txt_" + d.keyword.replace(/\&/g, "")
+            })
 
 
         function ticked() {
@@ -246,85 +256,85 @@
                     return d.y
                 });
 
-            // txts
-            //     .attr("x", function(d) {
-            //         return d.type ? d.x : d.x + siz(d.tot) + 4;
-            //     })
-            //     .attr("y", function(d) {
-            //         return d.type ? d.y : d.y; + siz(d.tot) + 4
-            //     });
+            txts
+                .attr("x", function(d) {
+                    return d.type ? d.x : d.x + siz(d.tot) + 4;
+                })
+                .attr("y", function(d) {
+                    return d.type ? d.y : d.y; + siz(d.tot) + 4
+                });
 
         }
 
 
-        // function mouseEnter(d) {
-        //     mouseLeave();
-        //
-        //     var id = d3.select(this).attr("id")
-        //     console.log(id);
-        //
-        //     if (id) {
-        //
-        //         d3.selectAll(".kw:not([id])").filter(function(e) {
-        //             return e[id] > 0
-        //         }).style("opacity", 1)
-        //
-        //     } else {
-        //
-        //         console.log(d);
-        //
-        //         d3.selectAll(".kw-txt:not([id])").style("opacity", 0)
-        //         d3.select(".k" + d.keyword.replace(/ /g, "_")).style("opacity", 1)
-        //
-        //         _.forEach(d, function(v, k) {
-        //             if (v > 0 && k in foci) {
-        //
-        //                 $(".info-cats").append("<div style='color:" + cols[k] + "'>" + k + ": <span>" + v + "</span></div>");
-        //
-        //                 sel.append("line")
-        //                     .attr("x1", d3.select("#" + k.replace(/\&/g, "")).attr("cx"))
-        //                     .attr("x2", d.x)
-        //                     .attr("y1", d3.select("#" + k.replace(/\&/g, "")).attr("cy"))
-        //                     .attr("y2", d.y)
-        //                     .style("stroke", "#fcfff7")
-        //                     .style("stroke-width", function(d) {
-        //                         return strscale(v)
-        //                     });
-        //             }
-        //         })
-        //         $(".curr-key h1").text(d.keyword)
-        //         $(".curr-key").show();
-        //     }
-        //
-        //
-        //     d3.selectAll(".kw:not([id])").style("opacity", .3)
-        //     d3.select(this).style("opacity", 1)
-        //
-        // }
-        //
-        // function mouseLeave(d) {
-        //     d3.selectAll(".kw").style("opacity", .9)
-        //     d3.selectAll(".kw-txt").style("opacity", function(d) {
-        //             return siz(d.tot) > 8 ? 1 : 0
-        //         })
-        //         //d3.select("."+d.keyword.replace(/ /g,"_")).style("opacity",function(d){return siz(d.tot)>8 ? 1 : 0})
-        //     d3.select(".sel").selectAll("*").remove();
-        //     $(".curr-key").hide();
-        //     $(".info-cats").empty();
-        // }
-        //
-        // $("#searchbox").autocomplete({
-        //     source: _.map(nodes, "keyword"),
-        //     select: function(event, ui) {
-        //
-        //
-        //         d3.selectAll(".kw")
-        //             .filter(function(d) {
-        //                 return d.keyword == ui.item.label
-        //             })
-        //             .each(mouseEnter)
-        //     }
-        // });
+        function mouseEnter(d) {
+            mouseLeave();
+
+            var id = d3.select(this).attr("id")
+            console.log(id);
+
+            if (id) {
+
+                d3.selectAll(".kw:not([id])").filter(function(e) {
+                    return e[id] > 0
+                }).style("opacity", 1)
+
+            } else {
+
+                console.log(d);
+
+                d3.selectAll(".kw-txt:not([id])").style("opacity", 0)
+                d3.select(".k" + d.keyword.replace(/ /g, "_")).style("opacity", 1)
+
+                _.forEach(d, function(v, k) {
+                    if (v > 0 && k in foci) {
+
+                        $(".info-cats").append("<div style='color:" + cols[k] + "'>" + k + ": <span>" + v + "</span></div>");
+
+                        sel.append("line")
+                            .attr("x1", d3.select("#" + k.replace(/\&/g, "")).attr("cx"))
+                            .attr("x2", d.x)
+                            .attr("y1", d3.select("#" + k.replace(/\&/g, "")).attr("cy"))
+                            .attr("y2", d.y)
+                            .style("stroke", "#fcfff7")
+                            .style("stroke-width", function(d) {
+                                return strscale(v)
+                            });
+                    }
+                })
+                $(".curr-key h1").text(d.keyword)
+                $(".curr-key").show();
+            }
+
+
+            d3.selectAll(".kw:not([id])").style("opacity", .3)
+            d3.select(this).style("opacity", 1)
+
+        }
+
+        function mouseLeave(d) {
+            d3.selectAll(".kw").style("opacity", .9)
+            d3.selectAll(".kw-txt").style("opacity", function(d) {
+                    return siz(d.tot) > 8 ? 1 : 0
+                })
+                //d3.select("."+d.keyword.replace(/ /g,"_")).style("opacity",function(d){return siz(d.tot)>8 ? 1 : 0})
+            d3.select(".sel").selectAll("*").remove();
+            $(".curr-key").hide();
+            $(".info-cats").empty();
+        }
+
+        $("#searchbox").autocomplete({
+            source: _.map(nodes, "keyword"),
+            select: function(event, ui) {
+
+
+                d3.selectAll(".kw")
+                    .filter(function(d) {
+                        return d.keyword == ui.item.label
+                    })
+                    .each(mouseEnter)
+            }
+        });
     });
     </script>
 </body>
