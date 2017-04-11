@@ -13,7 +13,6 @@
     <meta name="twitter:site" content="@densitydesign">
 
     <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
-    <link rel="stylesheet" media="screen" href="js/jquery-ui.min.css" type="text/css">
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml" sizes="32x32">
     <link rel="icon" href="img/favicon.png" type="image/gif" sizes="32x32">
 
@@ -25,62 +24,69 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
 
     <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+        (function(i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function() {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
-      ga('create', 'UA-5816319-6', 'auto');
-      ga('send', 'pageview');
-
+        ga('create', 'UA-5816319-6', 'auto');
+        ga('send', 'pageview');
     </script>
 </head>
 
 <body>
 
-    <div class="container header-box" role="heading">
-        <h1 class="header-title title">Polimatters</h1>
-        <p class="header-copy copy">At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the <span class="keywords">top 500 keywords</span> of the <span class="theses">20.277 master theses</span> discussed <span class="years">between 2010 and 2016</span>. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
-        <div class="header-interaction left">
-            <a href="faculties.htm"><img src="img/keywords_faculty.svg" class="header-img" alt="icon related to faculty data"></a>
-            <div class="header-button title long">
-                <a href="faculties.htm">the three macro areas: <br/><span class="second-line">Architecture, Design, Engineering</span></a>
-            </div>
-        </div>
-        <div class="header-interaction right">
-            <a href="design.htm"><img src="img/keywords_design.svg" class="header-img" alt="icon related to design data"></a>
-            <div class="header-button title">
-                <a href="design.htm">the Design School</a>
-            </div>
-        </div>
+    <h1 class="title">Polimatters</h1>
+    <div class="intro">
+        <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the top 500 keywordsof the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
     </div>
 
-    <div class="footer">
+    <div class="logo">
+      <img src="img/density_logo.png">
+    </div>
+
+    <div class="search_bar">
+      <input type="text" name="" value="" placeholder="Search">
+    </div>
+
+    <!-- <div class="footer">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-1 col-sm-2 col-xs-6">
-                    <a href="http://www.dipartimentodesign.polimi.it/"><img class="img-department" src="img/dip_logo.png" alt="politecnico di milano logo"></a>
-                </div>
-                <div class="col-md-1 col-sm-2 col-xs-6">
-                    <a href="http://www.densitydesign.org/"><img class="img-density" src="img/density_logo.png" alt="density design logo"></a>
-                </div>
-                <div class="col-md-4 col-sm-5 col-xs-12 col-sm-offset-1">
-                    <h4 class="credits-title title">Credits</h4>
-                    <ul class="credits-names copy">
-                        <li>Paolo Ciuccarelli <span class="role paolo">- Scientific Director</span></li>
-                        <li>Daniele Ciminieri <span class="role daniele">- Design &amp; Development</span></li>
-                        <li>Michele Invernizzi <span class="role michele">- Design &amp; Development</span></li>
-                    </ul>
-                </div>
+                <h4 class="credits-title title">Credits</h4>
+                <ul class="credits-names copy">
+                    <li>Paolo Ciuccarelli <span class="role paolo">- Scientific Director</span></li>
+                    <li>Daniele Ciminieri <span class="role daniele">- Design &amp; Development</span></li>
+                    <li>Michele Invernizzi <span class="role michele">- Design &amp; Development</span></li>
+                </ul>
             </div>
         </div>
-    </div>
+    </div> -->
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
     <script>
-
+        // Initialize Firebase
+        let config = {
+            apiKey: "AIzaSyAFAboe9Mj0nyMAo5Jk0iQH3ZKB8KS3z-s",
+            authDomain: "poliparser.firebaseapp.com",
+            databaseURL: "https://poliparser.firebaseio.com",
+            projectId: "poliparser",
+            storageBucket: "poliparser.appspot.com",
+            messagingSenderId: "891756668485"
+        };
+        firebase.initializeApp(config);
     </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="js/faculties.js"></script>
+
 </body>
 
 </html>

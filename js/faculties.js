@@ -190,14 +190,14 @@ firebase.database().ref('/keywords').once('value', snapshot => {
     .force("y", d3.forceY().strength(.2).y(function(bubble) {
         return bubble.positionY;
     }))
-    .force("charge", d3.forceManyBody().strength(-5))
+    .force("charge", d3.forceManyBody().strength(-1))
     .force("collide", d3.forceCollide().radius(function(bubble) {
-        return size(bubble.total) + 1;
+      return size(bubble.total) + 1;
     }).iterations(2))
     .force("center", d3.forceCenter(window.outerWidth / 2, window.outerHeight / 2 - 20));
 
   simulation
-    .nodes(bubbles)
+    .nodes(keywords)
     .on("tick", ticked);
 
   let svg = d3.select("body").append("svg")
@@ -337,9 +337,9 @@ firebase.database().ref('/keywords').once('value', snapshot => {
 
   function ticked() {
     bubble.attr("cx", function(bubble) {
-        return bubble.positionX;
+        return bubble.x;
       }).attr("cy", function(bubble) {
-        return bubble.positionY;
+        return bubble.y;
       });
   }
 });
