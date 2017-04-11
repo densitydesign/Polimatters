@@ -1,23 +1,23 @@
 // Bubble object prototype
 function Bubble(keyword, architecture, design, engineering) {
   this.keyword = keyword;
-  this.architecture = architecture;
-  this.design = design;
-  this.engineering = engineering;
-  this.total = architecture.total + design.total + engineering.total;
+  this.a = architecture;
+  this.d = design;
+  this.e = engineering;
+  this.total = a.total + d.total + e.total;
 }
 
 let center = [window.innerWidth / 2, window.innerHeight / 2];
 let colors = {
-  "engineering": "#00FFCA",
-  "architecture": "#FF3054",
-  "design": "#EEFF14"
+  "e": "#00FFCA",
+  "a": "#FF3054",
+  "d": "#EEFF14"
 };
 
 let faculties = [
-  "architecture",
-  "engineering",
-  "design"
+  "a",
+  "e",
+  "d"
 ];
 
 let architecture = [
@@ -93,27 +93,27 @@ let size = null;
 let total = 0;
 
 // Fetch data
-firebase.database().ref('/keywords').once('value', snapshot => {
+firebase.database().ref('/keywords').orderByChild('total').startAt(30).once('value', snapshot => {
   snapshot.forEach(keyword => {
     var word = keyword.val();
     var final = {};
-    final.architecture = 0;
-    final.design = 0;
-    final.engineering = 0;
+    final.a = 0;
+    final.d = 0;
+    final.e = 0;
 
     architecture.forEach(course => {
       if (_.includes(Object.keys(word), course))
-        final.architecture += word[course];
+        final.a += word[course];
     });
 
     design.forEach(course => {
       if (_.includes(Object.keys(word), course))
-        final.design += word[course];
+        final.d += word[course];
     });
 
     engineering.forEach(course => {
       if (_.includes(Object.keys(word), course))
-        final.engineering += word[course];
+        final.e += word[course];
     });
 
     final.keyword = keyword.key;
@@ -194,53 +194,83 @@ firebase.database().ref('/keywords').once('value', snapshot => {
     .force("collide", d3.forceCollide().radius(function(bubble) {
       return size(bubble.total) + 1;
     }).iterations(2))
-    .force("center", d3.forceCenter(window.outerWidth / 2, window.outerHeight / 2 - 20));
+    .force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2 - 20));
+
+  var tip = d3.tip()
+    .attr('class', 'd3-tip')
+    .offset([-10, 0])
+    .html(function(bubble) {
+      return "<strong style='color: #E0E0E0;'>Word:</strong> <span style='color:red'>" + bubble.keyword + "</span> <br> <strong style='color: #E0E0E0;'>Architecture:</strong> <span style='color:red'>" + bubble.a + "</span> <br> <strong style='color: #E0E0E0;'>Design:</strong> <span style='color:red'>" + bubble.d + "</span> <br> <strong style='color: #E0E0E0;'>Engineering:</strong> <span style='color:red'>" + bubble.e + "</span>";
+    })
+
 
   simulation
     .nodes(keywords)
     .on("tick", ticked);
 
   let svg = d3.select("body").append("svg")
-      .attr("width", window.outerWidth)
-      .attr("height", window.outerHeight)
-      .call(d3.zoom()
-          .scaleExtent([1 / 2, 4])
-          .on("zoom", zoomed)
-      );
+    .attr("width", window.innerWidth)
+    .attr("height", window.innerWidth)
+    .call(d3.zoom()
+      .scaleExtent([1 / 2, 4])
+      .on("zoom", zoomed)
+    )
+    .call(tip);
 
   var g = svg.append("g")
-      .attr("class", "g")
-      .style("pointer-events", "all");
+    .attr("class", "g")
+    .style("pointer-events", "all");
 
   g.append("rect")
-      .attr("width", window.outerWidth)
-      .attr("height", window.outerHeight)
-      .style("fill", "none");
+    .attr("width", window.innerWidth)
+    .attr("height", window.innerHeight)
+    .style("fill", "none");
 
   var sel = g.append("g")
-      .attr("class", "sel");
+    .attr("class", "sel");
 
   function zoomed() {
-      g.attr("transform", d3.event.transform);
+    g.attr("transform", d3.event.transform);
   }
 
   var bubble = g.selectAll(".keyword")
-      .data(bubbles)
-      .enter().append("circle")
-      .attr("class", "keyword")
-      .attr("r", function(bubble) {
-          return size(bubble.total);
-        })
-        .style("fill", function(bubble) {
-          return bubble.color;
-        })
-        // .style("stroke", function(d, i) {
-        //     return d.type ? colors[d.keyword] : "none"
-        // })
-        // .style("stroke-width", 5)
-        // .style("totality", .9)
-        // .on("mouseenter", mouseEnter)
-        // .on("mouseleave", mouseLeave);
+    .data(bubbles)
+    .enter().append("circle")
+    .attr("class", "keyword")
+    .attr("r", function(bubble) {
+      return size(bubble.total);
+    })
+    .style("fill", function(bubble) {
+      return bubble.color;
+    })
+    .on('click', clicked)
+    .on('mouseenter', mouseEnter)
+    .on('mouseleave', mouseLeave);
+
+    function clicked(bubble, index) {
+      $("#sidebar").show();
+      document.getElementById("keyword").innerHTML = bubble.keyword;
+      document.getElementById("architecture").innerHTML = "Architecture: " + bubble.a;
+      document.getElementById("design").innerHTML = "Design: " + bubble.d;
+      document.getElementById("engineering").innerHTML = "Engineering: " + bubble.e;
+    }
+
+    function mouseEnter(bubble, index) {
+      if (!faculties.includes(bubble.keyword))
+        tip.show(bubble, index);
+    }
+
+    function mouseLeave(bubble, index) {
+      tip.hide(bubble, index);
+    }
+
+    // .style("stroke", function(d, i) {
+    //     return d.type ? colors[d.keyword] : "none"
+    // })
+    // .style("stroke-width", 5)
+    // .style("totality", .9)
+    // .on("mouseenter", mouseEnter)
+    // .on("mouseleave", mouseLeave);
 
   // bubble.filter(function(d) {
   //         return d.type;

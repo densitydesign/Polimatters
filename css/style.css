@@ -1,5 +1,7 @@
 body {
   background: #212121;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .title {
@@ -8,6 +10,32 @@ body {
 
 .intro {
   color: #E0E0E0;
+}
+
+.toggle_sidebar {
+  position: absolute;
+  right: 0;
+}
+
+.sidebar {
+  margin: 35px;
+  position: absolute;
+  right: 0;
+  color: #E0E0E0;
+  display: none;
+}
+
+ul {
+  height: 70%;
+  width: 20%;
+  /*z-index: -1;*/
+  color: #E0E0E0;
+  position: absolute;
+  text-align: left;
+  overflow: scroll;
+}
+
+.search_bar {
 }
 
 .logo {
@@ -37,6 +65,35 @@ body {
   right:0;
   margin-left:auto;
   margin-right:auto;
+}
+
+.d3-tip {
+  line-height: 1;
+  padding: 6px;
+  background: #424242;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips specifically */
+.d3-tip.n:after {
+  margin: -2px 0 0 0;
+  top: 100%;
+  left: 0;
 }
 
 ::-webkit-input-placeholder { /* Chrome */

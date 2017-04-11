@@ -45,15 +45,28 @@
 
     <h1 class="title">Polimatters</h1>
     <div class="intro">
-        <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the top 500 keywordsof the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
+        <!-- <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the top 500 keywordsof the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p> -->
     </div>
 
     <div class="logo">
       <img src="img/density_logo.png">
     </div>
 
+    <div class="toggle_sidebar">
+      <button type="button" name="button" id="toggle">toggle</button>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+      <p id="keyword"></p>
+      <p id="architecture"></p>
+      <p id="design"></p>
+      <p id="engineering"></p>
+    </div>
+
     <div class="search_bar">
-      <input type="text" name="" value="" placeholder="Search">
+      <input type="text" id="searchbar" onkeyup="search()" placeholder="Search">
+
+      <ul id="searchResults"></ul>
     </div>
 
     <!-- <div class="footer">
@@ -85,7 +98,34 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.js"></script>
+    <script src="js/d3-tip.js"></script>
     <script src="js/faculties.js"></script>
+
+    <script type="text/javascript">
+      $('#toggle').click(function(event) {
+        $("#sidebar").show();
+      });
+
+      function search() {
+          // Declare variables
+          var input, filter, ul, li, a, i;
+          input = document.getElementById('searchbar');
+          query = input.value.toLowerCase();
+          ul = document.getElementById("searchResults");
+
+          if (query != null) {
+            firebase.database().ref('keywords').orderByKey().startAt(query).endAt(query + "\uf8ff").once('value', snapshot => {
+              $("#searchResults").empty();
+              snapshot.forEach(keyword => {
+                $("#searchResults").append($("<li>").text(keyword.key)).attr('href','/keyword/' + keyword.key);
+              });
+            });
+          } else {
+            $("#searchResults").empty();
+          }
+      }
+    </script>
 
 </body>
 
