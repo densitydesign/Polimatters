@@ -5,16 +5,60 @@ body {
 }
 
 .title {
+  text-align: center;
   color: #E0E0E0;
 }
 
 .intro {
   color: #E0E0E0;
+  margin-top: 40px;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.toggle_language {
+  color: #E0E0E0;
+  position: absolute;
+  bottom: 15px;
+  right: 25px;
+  font-weight: bold;
+}
+
+.visualisation {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .toggle_sidebar {
+  display: none;
   position: absolute;
   right: 0;
+}
+
+.slider {
+  bottom: 25px;
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  width: 75% !important;
+  display: none;
+}
+
+#back {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #E0E0E0;
+  font-size: 25px;
+  position: absolute;
+  display: none;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  margin: 75px;
 }
 
 .sidebar {
@@ -35,7 +79,16 @@ ul {
   overflow: scroll;
 }
 
-.search_bar {
+.credits {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  bottom: 25px;
+  width: 30%;
+  text-align: center;
+  color: #E0E0E0;
 }
 
 .logo {
@@ -45,6 +98,7 @@ ul {
 }
 
 .search_bar {
+  display: none;
   text-align: center;
 }
 
@@ -53,7 +107,7 @@ ul {
   width: 55%;
   height: 40px;
   position: absolute;
-  bottom: 0;
+  top: 0;
   margin: 25px;
   font-size: 20px;
   /*padding-left: 15px;*/
@@ -87,6 +141,31 @@ ul {
   content: "\25BC";
   position: absolute;
   text-align: center;
+}
+
+#chart {
+  z-index: 1;
+}
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.link:hover {
+  stroke-opacity: .5;
 }
 
 /* Style northward tooltips specifically */

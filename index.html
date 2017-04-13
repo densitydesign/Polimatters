@@ -20,8 +20,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lora:400" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/css/ion.rangeSlider.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/css/ion.rangeSlider.skinFlat.min.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
 
     <script>
         (function(i, s, o, g, r, a, m) {
@@ -43,9 +46,15 @@
 
 <body>
 
-    <h1 class="title">Polimatters</h1>
-    <div class="intro">
-        <!-- <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the top 500 keywordsof the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p> -->
+    <h1 class="title" id="title">Polimatters</h1>
+    <div class="intro" id="intro">
+        <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the top 500 keywordsof the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
+    </div>
+
+    <div class="visualisation"></div>
+
+    <div class="toggle_language" id="toggle_language">
+      <p>IT</p>
     </div>
 
     <div class="logo">
@@ -57,11 +66,14 @@
     </div>
 
     <div class="sidebar" id="sidebar">
-      <p id="keyword"></p>
-      <p id="architecture"></p>
-      <p id="design"></p>
-      <p id="engineering"></p>
+
     </div>
+
+    <div class="slider">
+      <input class="time_peek" id="time_peek"></input>
+    </div>
+
+    <button class="fa fa-arrow-left" aria-hidden="true" id="back"></button>
 
     <div class="search_bar">
       <input type="text" id="searchbar" onkeyup="search()" placeholder="Search">
@@ -69,18 +81,12 @@
       <ul id="searchResults"></ul>
     </div>
 
-    <!-- <div class="footer">
-        <div class="container-fluid">
-            <div class="row">
-                <h4 class="credits-title title">Credits</h4>
-                <ul class="credits-names copy">
-                    <li>Paolo Ciuccarelli <span class="role paolo">- Scientific Director</span></li>
-                    <li>Daniele Ciminieri <span class="role daniele">- Design &amp; Development</span></li>
-                    <li>Michele Invernizzi <span class="role michele">- Design &amp; Development</span></li>
-                </ul>
-            </div>
-        </div>
-    </div> -->
+    <div class="credits" id="credits">
+      <h4>Credits</h4>
+      Paolo Ciuccarelli - Scientific Director <br>
+      Daniele Ciminieri - Design &amp; Development <br>
+      Michele Invernizzi - Design &amp; Development
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
     <script>
@@ -95,26 +101,39 @@
         };
         firebase.initializeApp(config);
     </script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.js"></script>
     <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.js"></script>
+    <script src="js/sankey.js"></script>
     <script src="js/d3-tip.js"></script>
     <script src="js/faculties.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/js/ion.rangeSlider.min.js"></script>
 
     <script type="text/javascript">
+      $("#time_peek").ionRangeSlider({
+        type: "double",
+        grid: true,
+        min: 1980,
+        max: 2017, // TODO: get system year
+        from: 1980,
+        to: 2017,
+        step: 1
+      });
+
       $('#toggle').click(function(event) {
         $("#sidebar").show();
       });
 
       function search() {
-          // Declare variables
-          var input, filter, ul, li, a, i;
-          input = document.getElementById('searchbar');
-          query = input.value.toLowerCase();
-          ul = document.getElementById("searchResults");
+          var input = document.getElementById('searchbar');
+          var query = input.value.toLowerCase();
+          var ul = document.getElementById('searchResults');
 
-          if (query != null) {
+          // Remove previous listener on the reference
+          firebase.database().ref('keywords').off();
+
+          if (query != '') {
             firebase.database().ref('keywords').orderByKey().startAt(query).endAt(query + "\uf8ff").once('value', snapshot => {
               $("#searchResults").empty();
               snapshot.forEach(keyword => {

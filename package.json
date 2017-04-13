@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/vathsav/polimatters#readme",
   "dependencies": {
-    "bootstrap-slider": "^9.7.2"
+    "bootstrap-slider": "^9.7.2",
+    "ion-rangeslider": "^2.1.7",
+    "nouislider": "^9.2.0"
   }
 }
