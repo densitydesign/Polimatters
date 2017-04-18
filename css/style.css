@@ -97,12 +97,12 @@ ul {
   margin: 25px;
 }
 
-.search_bar {
+.searchbar {
   display: none;
   text-align: center;
 }
 
-.search_bar input {
+.searchbar input {
   color: #E0E0E0;
   width: 55%;
   height: 40px;

@@ -75,8 +75,8 @@
 
     <button class="fa fa-arrow-left" aria-hidden="true" id="back"></button>
 
-    <div class="search_bar">
-      <input type="text" id="searchbar" onkeyup="search()" placeholder="Search">
+    <div class="searchbar" id="searchbar">
+      <input type="text" id="search_query" onkeyup="search()" placeholder="Search">
 
       <ul id="searchResults"></ul>
     </div>
@@ -126,7 +126,7 @@
       });
 
       function search() {
-          var input = document.getElementById('searchbar');
+          var input = document.getElementById('search_query');
           var query = input.value.toLowerCase();
           var ul = document.getElementById('searchResults');
 
