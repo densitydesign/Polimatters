@@ -277,7 +277,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       .attr("dy", function(d) { return center[1] + 5; })
       .attr("opacity", 0)
       .attr("font-family", "Poiret One")
-      .attr("font-size", 20)
+      .attr("font-size", 18)
       .text(function(d) { return "Politecnico di Milano"; })
       .style("fill", function(d) { return "#E0E0E0"; })
       .transition()
@@ -313,15 +313,52 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       .force("y", d3.forceY().strength(.2).y(function(bubble) {
         return bubble.positionY;
       }))
-      .force("charge", d3.forceManyBody().strength(-1))
+      .force("charge", d3.forceManyBody().strength(0))
       .force("collide", d3.forceCollide().radius(function(bubble) {
         return size(bubble.total) + 0.5;
       }).iterations(2))
-      .force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2 - 20));
+      .force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2));
 
     simulation
       .nodes(bubbles)
       .on("tick", ticked);
+
+    var bubble = g.selectAll(".keyword")
+      .data(bubbles)
+      .enter()
+      .append("circle")
+        .attr("class", "keyword")
+        .attr("r", function(bubble) {
+          return size(bubble.total);
+        })
+        .style("fill", function(bubble) {
+          return bubble.color;
+        })
+        .on('click', function(bubble) {
+          navigateTo(2, bubble);
+        })
+        .on('mouseenter', tip.show)
+        .on('mouseleave', tip.hide);
+
+    // TODO: Labels for the bubbles
+    var text = g.selectAll(".keyword-text")
+      .data(bubbles)
+      .enter()
+      .append("text")
+        .attr("class", "keyword-text")
+        .attr("text-anchor", function(d) {
+          if (faculties.includes(d.keyword)) return "middle";
+          else return "left";
+        })
+        .attr("font-family", "Poiret One")
+        .attr("font-size", 15)
+        .text(function(d) {
+          if (d.keyword == 'a') return "Architecture";
+          else if (d.keyword == 'd') return "Design";
+          else if (d.keyword == 'e') return "Engineering";
+          else if (d.total > 40) return d.keyword;
+        })
+        .style("fill", function(d) { return "#E0E0E0"; });
 
     function ticked() {
       bubble.attr("cx", function(bubble) {
@@ -329,23 +366,13 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       }).attr("cy", function(bubble) {
         return bubble.y;
       });
+      text.attr("x", function(text) {
+        if (faculties.includes(text.keyword)) return text.x;
+        return text.x + size(text.total) + 5;
+      }).attr("y", function(text) {
+        return text.y + 6;
+      });
     }
-
-    var bubble = g.selectAll(".keyword")
-      .data(bubbles)
-      .enter().append("circle")
-      .attr("class", "keyword")
-      .attr("r", function(bubble) {
-        return size(bubble.total);
-      })
-      .style("fill", function(bubble) {
-        return bubble.color;
-      })
-      .on('click', function(bubble) {
-        navigateTo(2, bubble);
-      })
-      .on('mouseenter', tip.show)
-      .on('mouseleave', tip.hide);
 
     svg.call(tip);
 
@@ -502,6 +529,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
             "translate(" + margin.left + "," + margin.top + ")");
 
         var legendContainer = d3.select(".alluvial_legend").append("svg")
+          .attr("id", "legend")
           .attr("width", 500)
           .attr("height", 100);
 
@@ -697,6 +725,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
         currentPage = 2;
         $(".visualisation").css({ position: 'relative' });
         d3.select('#tooltip').remove();
+        d3.select('#legend').remove();
         $('#alluvial_legend').show();
 
         // TODO: Go through this
