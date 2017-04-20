@@ -2,16 +2,22 @@ body {
   background: #212121;
   max-height: 100%;
   overflow: hidden;
+  font-family: 'Lato', sans-serif;
 }
 
 .title {
+  font-family: 'Poiret One', cursive;
+  font-size: 75px;
+  margin: 50px;
   text-align: center;
   color: #E0E0E0;
 }
 
 .intro {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
   color: #E0E0E0;
-  margin-top: 40px;
+  text-align: center;
   margin-left: 10%;
   margin-right: 10%;
 }
@@ -25,7 +31,7 @@ body {
 }
 
 .visualisation {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
 }
@@ -79,6 +85,18 @@ ul {
   overflow: scroll;
 }
 
+.alluvial_legend {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  bottom: 25px;
+  text-align: center;
+  color: #E0E0E0;
+  display: none;
+}
+
 .credits {
   position: absolute;
   margin-left: auto;
@@ -108,7 +126,6 @@ ul {
   height: 40px;
   position: absolute;
   top: 0;
-  margin: 25px;
   font-size: 20px;
   /*padding-left: 15px;*/
   border: 0;
@@ -117,6 +134,7 @@ ul {
   border-bottom: 1px solid #E0E0E0;
   left:0;
   right:0;
+  margin-top: 65px;
   margin-left:auto;
   margin-right:auto;
 }
@@ -155,12 +173,11 @@ ul {
 
 .node text {
   pointer-events: none;
-  text-shadow: 0 1px 0 #fff;
 }
 
 .link {
   fill: none;
-  stroke: #000;
+  stroke: #F5F5F5;
   stroke-opacity: .2;
 }
 

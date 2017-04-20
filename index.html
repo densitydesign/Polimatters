@@ -16,6 +16,13 @@
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml" sizes="32x32">
     <link rel="icon" href="img/favicon.png" type="image/gif" sizes="32x32">
 
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Poiret+One" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Didact+Gothic" rel="stylesheet">
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
@@ -48,7 +55,7 @@
 
     <h1 class="title" id="title">Polimatters</h1>
     <div class="intro" id="intro">
-        <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the top 500 keywordsof the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
+        <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the top 500 keywords of the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
     </div>
 
     <div class="visualisation"></div>
@@ -67,6 +74,9 @@
 
     <div class="sidebar" id="sidebar">
 
+      <!--
+    <div class="chartBar" id="chartBar">
+ -->
     </div>
 
     <div class="slider">
@@ -88,6 +98,9 @@
       Michele Invernizzi - Design &amp; Development
     </div>
 
+    <div class="alluvial_legend" id="alluvial_legend">
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
     <script>
         // Initialize Firebase
@@ -105,6 +118,8 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.js"></script>
     <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <!-- <script src="js/crossfilter.js"></script> -->
+    <!-- <script src="js/barchart.js"></script> -->
     <script src="js/sankey.js"></script>
     <script src="js/d3-tip.js"></script>
     <script src="js/faculties.js"></script>

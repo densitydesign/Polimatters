@@ -92,12 +92,16 @@ let radius = (window.innerWidth / 2) * .4;
 let size = null;
 let total = 0;
 
-var page = ["home", "departments", "keyword"];
-var currentPage = page[0];
+var currentPage = 0;
+var limitter = 1;
+
+var minimumYear = 2008;
+var maximumYear = 2016;
 
 // Fetch data
 // 54325 keywords
-firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('value', snapshot => {
+firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('value', snapshot => {
+// firebase.database().ref('/keywords').once('value', snapshot => {
   snapshot.forEach(keyword => {
     var word = keyword.val();
     var final = {};
@@ -126,6 +130,40 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
     total += final.total;
   });
 }).then(v => {
+  // /* TEST */
+  // var data = [
+  //   {date: "2009", quantity: 2, total: 190, tip: 100, type: "tab"},
+  //   {date: "2010", quantity: 2, total: 190, tip: 100, type: "tab"},
+  //   {date: "2011", quantity: 1, total: 300, tip: 200, type: "visa"},
+  //   {date: "2012", quantity: 2, total: 90, tip: 0, type: "tab"},
+  //   {date: "2013", quantity: 2, total: 90, tip: 0, type: "tab"},
+  //   {date: "2014", quantity: 2, total: 90, tip: 0, type: "tab"},
+  //   {date: "2015", quantity: 2, total: 90, tip: 0, type: "tab"},
+  //   {date: "2016", quantity: 2, total: 90, tip: 0, type: "tab"}
+  // ];
+  //
+  // const formatDate = d3.timeFormat('%B %d, %Y');
+  //
+  // console.log(data);
+  //
+  // var filter = crossfilter(data);
+  //
+  // const date = filter.dimension(d => d.date);
+  // const dates = date.group(d3.timeDay);
+  // filter = filter.dimension(function(d) { return d.total; });
+  //
+  // var chart = barChart()
+  //     .dimension(date)
+  //     .group(dates)
+  //     .round(d3.timeDay.round)
+  //     .x(d3.scaleTime()
+  //       .domain([2008, 2016])
+  //       .rangeRound([0, 10 * 90]))
+  //     .filter([new Date(2001, 1, 1), new Date(2001, 2, 1)]);
+  //
+  // d3.select(".chartBar").data(chart)
+  //     .each(function(chart) { chart.on("brush", function(d) {}).on("brushend", function(d) {}); });
+
   size = d3.scaleSqrt()
     .domain([0, total])
     .range([0, 96]);
@@ -178,98 +216,37 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
     });
   });
 
-  var tip = d3.tip()
-    .attr('class', 'd3-tip')
-    .offset([-10, 0])
-    .html(function(bubble) {
-      if (faculties.includes(bubble.keyword)) {
-        var department;
-        if (bubble.keyword == 'a') department = 'Architecture';
-        else if (bubble.keyword == 'd') department = 'Design';
-        else if (bubble.keyword == 'e') department = 'Engineering';
-        return "<strong style='color: #E0E0E0;'>Department: </strong> <span style='color:red'>" + department + "</span>";
-      }
-      return "<strong style='color: #E0E0E0;'>Word:</strong> <span style='color:red'>" + bubble.keyword + "</span> <br> <strong style='color: #E0E0E0;'>Architecture:</strong> <span style='color:red'>" + bubble.a + "</span> <br> <strong style='color: #E0E0E0;'>Design:</strong> <span style='color:red'>" + bubble.d + "</span> <br> <strong style='color: #E0E0E0;'>Engineering:</strong> <span style='color:red'>" + bubble.e + "</span>";
-    });
+  var tip = d3.tip();
+  var svg, g;
 
-  var simulation = d3.forceSimulation()
-    .force("x", d3.forceX().strength(.2).x(function(bubble) {
-      return bubble.positionX;
-    }))
-    .force("y", d3.forceY().strength(.2).y(function(bubble) {
-      return bubble.positionY;
-    }))
-    .force("charge", d3.forceManyBody().strength(-1))
-    .force("collide", d3.forceCollide().radius(function(bubble) {
-      return size(bubble.total) + 1;
-    }).iterations(2))
-    .force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2 - 20));
+  function initSVG() {
+    svg = d3.select(".visualisation").append("svg")
+      .attr("width", window.innerWidth)
+      .attr("height", window.innerHeight)
+      .call(d3.zoom()
+        .scaleExtent([1 / 2, 4])
+        .on("zoom", zoomed)
+      )
 
-  simulation
-    .nodes(bubbles)
-    .on("tick", ticked);
+    g = svg.append("g")
+      .attr("class", "g")
+      .style("pointer-events", "all");
 
-  simulation.stop();
+    g.append("rect")
+      .attr("width", window.innerWidth)
+      .attr("height", window.innerHeight)
+      .style("fill", "none");
 
-  function ticked() {
-    bubble.attr("cx", function(bubble) {
-      return bubble.x;
-    }).attr("cy", function(bubble) {
-      return bubble.y;
-    });
+    function zoomed() {
+      g.attr("transform", d3.event.transform);
+    }
   }
 
-  var svg = d3.select(".visualisation").append("svg")
-    .attr("width", window.innerWidth)
-    .attr("height", window.innerHeight)
-    .call(d3.zoom()
-      .scaleExtent([1 / 2, 4])
-      .on("zoom", zoomed)
-    )
-
-  var g = svg.append("g")
-    .attr("class", "g")
-    .style("pointer-events", "all");
-
-  g.append("rect")
-    .attr("width", window.innerWidth)
-    .attr("height", window.innerHeight)
-    .style("fill", "none");
-
-  var sel = g.append("g")
-    .attr("class", "sel");
-
-  function zoomed() {
-    g.attr("transform", d3.event.transform);
-  }
-
-  var bubble = g.selectAll(".keyword")
-    .data(bubbles)
-    .enter().append("circle")
-    .attr("class", "keyword")
-    .attr("r", function(bubble) {
-      return size(bubble.total);
-    })
-    .style("fill", function(bubble) {
-      return bubble.color;
-    })
-    .on('click', function(bubble) {
-      currentPage = page[2];
-
-      if (!faculties.includes(bubble.keyword)) {
-        $("#back").show();
-        d3.selectAll(".keyword").style("opacity", 0);
-        tip.attr('class', '')
-          .html('');
-        exploreKeyword(bubble.keyword);
-      }
-    })
-    .on('mouseenter', tip.show)
-    .on('mouseleave', tip.hide);
-
-  showHome();
+  navigateTo(0);
 
   function showHome() {
+    initSVG();
+
     $('#title').show();
     $('#intro').show();
     $('#credits').show();
@@ -287,25 +264,90 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
         $('#intro').hide();
         $('#credits').hide();
         $('#back').show();
-        d3.select("ellipse").transition()
-          .attr("rx", 0)
-          .attr("ry", 0)
-          .style("fill", "#E1BEE7");
-        currentPage = page[1];
-        showDepartments();
+        navigateTo(1);
       })
       .transition()
-        .attr("rx", (total / size(total)) * 2)
-        .attr("ry", (total / size(total)) * 2)
-        .style("fill", "#6A1B9A")
+        .attr("rx", (total / size(total)) * 2) // TODO: modify later
+        .attr("ry", (total / size(total)) * 2) // TODO: modify later
+        .style("fill", "#6A1B9A");
+
+    svg.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dx", function(d) { return center[0]; })
+      .attr("dy", function(d) { return center[1] + 5; })
+      .attr("opacity", 0)
+      .attr("font-family", "Poiret One")
+      .attr("font-size", 20)
+      .text(function(d) { return "Politecnico di Milano"; })
+      .style("fill", function(d) { return "#E0E0E0"; })
+      .transition()
+        .attr("opacity", 1);
+
+      // TODO: add a transition for the text when it's clicked as well
   }
 
-  function showDepartments() {
-    currentPage = page[1];
-    simulation.restart();
-    svg.call(tip);
+  function showForceLayout() {
+    currentPage = 1;
 
-    $("#searchbar").show();
+    initSVG();
+
+    tip
+      .attr('class', 'd3-tip')
+      .attr('id', 'tooltip')
+      .offset([-10, 0])
+      .html(function(bubble) {
+        if (faculties.includes(bubble.keyword)) {
+          var department;
+          if (bubble.keyword == 'a') department = 'Architecture';
+          else if (bubble.keyword == 'd') department = 'Design';
+          else if (bubble.keyword == 'e') department = 'Engineering';
+          return "<strong style='color: #E0E0E0;'>Department: </strong> <span style='color:red'>" + department + "</span>";
+        }
+        return "<strong style='color: #E0E0E0;'>Word:</strong> <span style='color:red'>" + bubble.keyword + "</span> <br> <strong style='color: #E0E0E0;'>Architecture:</strong> <span style='color:red'>" + bubble.a + "</span> <br> <strong style='color: #E0E0E0;'>Design:</strong> <span style='color:red'>" + bubble.d + "</span> <br> <strong style='color: #E0E0E0;'>Engineering:</strong> <span style='color:red'>" + bubble.e + "</span>";
+      });
+
+    var simulation = d3.forceSimulation()
+      .force("x", d3.forceX().strength(.2).x(function(bubble) {
+        return bubble.positionX;
+      }))
+      .force("y", d3.forceY().strength(.2).y(function(bubble) {
+        return bubble.positionY;
+      }))
+      .force("charge", d3.forceManyBody().strength(-1))
+      .force("collide", d3.forceCollide().radius(function(bubble) {
+        return size(bubble.total) + 0.5;
+      }).iterations(2))
+      .force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2 - 20));
+
+    simulation
+      .nodes(bubbles)
+      .on("tick", ticked);
+
+    function ticked() {
+      bubble.attr("cx", function(bubble) {
+        return bubble.x;
+      }).attr("cy", function(bubble) {
+        return bubble.y;
+      });
+    }
+
+    var bubble = g.selectAll(".keyword")
+      .data(bubbles)
+      .enter().append("circle")
+      .attr("class", "keyword")
+      .attr("r", function(bubble) {
+        return size(bubble.total);
+      })
+      .style("fill", function(bubble) {
+        return bubble.color;
+      })
+      .on('click', function(bubble) {
+        navigateTo(2, bubble);
+      })
+      .on('mouseenter', tip.show)
+      .on('mouseleave', tip.hide);
+
+    svg.call(tip);
 
     // Tincy rotation
     var speed = 0;
@@ -319,37 +361,38 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
   function exploreKeyword(keyword) {
     console.log(keyword);
 
+    d3.select('svg').remove();
     var metadata = {};
 
     // Fetch firebase metadata
-    firebase.database().ref('keywords/' + keyword).once('value')
+    firebase.database().ref('metadata/' + keyword).once('value')
       .then(function(snapshot) {
-
         // The types of nodes in the alluvial chart
+        var keyword_node = [];
         var degree_type = [];
         var relator = [];
         var school = [];
         var language = [];
 
         snapshot.forEach(function(object, index) {
-          if (object.key.startsWith('-Ki0Z')) {
-            // Theses objects
-            degree_type.push(object.val().degree_type);
-            relator.push(object.val().relator);
-            school.push(object.val().school);
-            language.push(object.val().language);
-          }
+          keyword_node.push(keyword);
+          degree_type.push(object.val().degree_type);
+          relator.push(object.val().relator);
+          school.push(object.val().school);
+          language.push(object.val().language);
         });
 
         // Contruct the links and the nodes
         var nodes = [];
         var links = [];
 
+        var chosenKeyword = Array.from(new Set(keyword_node));
         var uniqueDegreeTypes = Array.from(new Set(degree_type));
         var uniqueSchools = Array.from(new Set(school));
+        var uniqueRelators = Array.from(new Set(relator));
         var uniqueLanguages = Array.from(new Set(language));
 
-        var allNodes = uniqueDegreeTypes.concat(uniqueSchools, uniqueLanguages);
+        var allNodes = chosenKeyword.concat(uniqueLanguages, uniqueDegreeTypes, uniqueSchools, uniqueRelators);
 
         var numberOfTheses = degree_type.length;
 
@@ -395,18 +438,34 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
           nodes.forEach(sourceNode => {
             nodes.forEach(targetNode => {
               // Check for a link between the source and the target nodes
-
-              // Links between degree_type and school
-              if (sourceNode.name == degree_type[thesis] && targetNode.name == school[thesis]) {
+              if (sourceNode.name == keyword_node[thesis] && targetNode.name == language[thesis]) {
                 // A particular thesis has this link
                 addLink(sourceNode.node, targetNode.node);
               }
-              if (sourceNode.name == school[thesis] && targetNode.name == language[thesis]) {
+              // Links between degree_type and school
+              if (sourceNode.name == language[thesis] && targetNode.name == degree_type[thesis]) {
+                // A particular thesis has this link
+                addLink(sourceNode.node, targetNode.node);
+              }
+              if (sourceNode.name == degree_type[thesis] && targetNode.name == school[thesis]) {
+                addLink(sourceNode.node, targetNode.node);
+              }
+              if (sourceNode.name == school[thesis] && targetNode.name == relator[thesis]) {
                 addLink(sourceNode.node, targetNode.node);
               }
             });
           });
         }
+
+        // Push the keyword
+        // nodes.push({
+        //   "node": 0,
+        //   "name": keyword
+        // });
+
+        // Links from keyword
+        // addLink(0, 1);
+        // addLink(0, 2)
 
         var graph = {};
         graph.nodes = nodes;
@@ -414,18 +473,18 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
 
         $("#searchbar").hide();
 
-        currentPage = page[2];
-        var units = "Widgets";
+        currentPage = 2;
+        var units = "theses"; // TODO: Handle singular ["thesis", "theses"];
 
         // set the dimensions and margins of the graph
         var margin = {
-            top: 10,
-            right: 10,
-            bottom: 10,
-            left: 10
+            top: 50,
+            right: 50,
+            bottom: 50,
+            left: 50
           },
-          width = 1000 - margin.left - margin.right,
-          height = 600 - margin.top - margin.bottom;
+          width = 0.90 * window.innerWidth - margin.left - margin.right,
+          height = 0.90 * window.innerHeight - margin.top - margin.bottom;
 
         // format variables
         var formatNumber = d3.format(",.0f"), // zero decimal places
@@ -435,17 +494,50 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
           color = d3.scaleOrdinal(d3.schemeCategory20);
 
         // append the svg object to the body of the page
-        var svg = d3.select("body").append("svg")
+        var svg = d3.select(".visualisation").append("svg")
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom)
           .append("g")
           .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
+        var legendContainer = d3.select(".alluvial_legend").append("svg")
+          .attr("width", 500)
+          .attr("height", 100);
+
+        var circles = [
+          { x: 30, y: 30, r: 10, color: "#00E5FF", label: "Degree Type" },
+          { x: 280, y: 30, r: 10, color: "#F50057", label: "School" },
+          { x: 30, y: 70, r: 10, color: "#FFC400", label: "Language" },
+          { x: 280, y: 70, r: 10, color: "#76FF03", label: "Relators" }
+        ];
+
+        legendContainer.selectAll("circle")
+          .data(circles)
+          .enter()
+          .append("circle")
+            .attr("cx", function (d) { return d.x; })
+            .attr("cy", function (d) { return d.y; })
+            .attr("r", function (d) { return d.r; })
+            .style("fill", function(d) { return d.color; });
+
+        legendContainer.selectAll("text")
+          .data(circles)
+          .enter()
+          .append("text")
+            .attr("dx", function(d) { return d.x + 25; })
+            .attr("dy", function(d) { return d.y + 5; })
+            .attr("font-family", "Poiret One")
+            .text(function(d) { return d.label; })
+            .style("fill", function(d) { return "#E0E0E0"; });
+
+        d3.select(".visualisation")
+          .attr("align", "center");
+
         // Set the sankey diagram properties
         var sankey = d3.sankey()
-          .nodeWidth(36)
-          .nodePadding(40)
+          .nodeWidth(25)
+          .nodePadding(5)
           .size([width, height]);
 
         var path = sankey.link();
@@ -490,7 +582,8 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
             .on("start", function() {
               this.parentNode.appendChild(this);
             })
-            .on("drag", dragmove));
+            .on("drag", dragmove)
+          );
 
         // add the rectangles for the nodes
         node.append("rect")
@@ -499,10 +592,32 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
           })
           .attr("width", sankey.nodeWidth())
           .style("fill", function(d) {
-            return d.color = color(d.name.replace(/ .*/, ""));
+            // return d.color = color(d.name.replace(/ .*/, ""));
+
+            if (uniqueDegreeTypes.includes(d.name)) {
+              return d3.rgb('#00E5FF');
+            } else if (uniqueSchools.includes(d.name)) {
+              return d3.rgb('#F50057');
+            } else if (uniqueLanguages.includes(d.name)) {
+              return d3.rgb('#FFC400');
+            } else if (uniqueRelators.includes(d.name)) {
+              return d3.rgb('#76FF03');
+            } else {
+              return d3.rgb('#FF3D00');
+            }
           })
           .style("stroke", function(d) {
-            return d3.rgb(d.color).darker(2);
+            if (uniqueDegreeTypes.includes(d.name)) {
+              return d3.rgb('#00E5FF');
+            } else if (uniqueSchools.includes(d.name)) {
+              return d3.rgb('#F50057');
+            } else if (uniqueLanguages.includes(d.name)) {
+              return d3.rgb('#FFC400');
+            } else if (uniqueRelators.includes(d.name)) {
+              return d3.rgb('#76FF03');
+            } else {
+              return d3.rgb('#FF3D00');
+            }
           })
           .append("title")
           .text(function(d) {
@@ -511,6 +626,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
 
         // add in the title for the nodes
         node.append("text")
+          .style("fill", '#E0E0E0')
           .attr("x", -6)
           .attr("y", function(d) {
             return d.dy / 2;
@@ -529,14 +645,14 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
 
         // the function for moving the nodes
         function dragmove(d) {
-        //   d3.select(this)
-        //     .attr("transform",
-        //       "translate(" +
-        //       d.x + "," +
-        //       (d.y = Math.max(
-        //         0, Math.min(height - d.dy, d3.event.y))) + ")");
-        //   sankey.relayout();
-        //   link.attr("d", path);
+          d3.select(this)
+            .attr("transform",
+              "translate(" +
+              d.x + "," +
+              (d.y = Math.max(
+                0, Math.min(height - d.dy, d3.event.y))) + ")");
+          sankey.relayout();
+          link.attr("d", path);
         }
       })
       .catch(function(e) {
@@ -544,14 +660,61 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(2).once('valu
       });
   }
 
+  d3.select(window).on('resize', resize);
+
+  function resize() {
+    // TODO: complete this
+  }
+
+  function navigateTo(navigate, bubble) {
+    switch (navigate) {
+      case 0:
+        currentPage = 0;
+        $(".visualisation").css({ position: 'absolute' });
+        $('#searchbar').hide();
+        $('#alluvial_legend').hide();
+        showHome();
+        d3.select('#tooltip').remove();
+        break;
+      case 1:
+        currentPage = 1;
+        $('#searchbar').show();
+        $(".visualisation").css({ position: 'absolute' });
+        $('#alluvial_legend').hide();
+
+        // Make the Polimi ellipse dissappear
+        d3.select("ellipse").transition()
+          .attr("rx", 0)
+          .attr("ry", 0)
+          .style("fill", "#E1BEE7")
+          .on("end", function(d) {
+            d3.select("svg").remove();
+          });
+          d3.select('#tooltip').remove();
+          showForceLayout();
+        break;
+      case 2:
+        currentPage = 2;
+        $(".visualisation").css({ position: 'relative' });
+        d3.select('#tooltip').remove();
+        $('#alluvial_legend').show();
+
+        // TODO: Go through this
+        if (!faculties.includes(bubble.keyword)) {
+          $("#back").show();
+          d3.selectAll(".keyword").remove();
+          exploreKeyword(bubble.keyword);
+        }
+        break;
+    }
+  }
+
   $("#back").click(function(d) {
-    if (currentPage == page[1]) {
-      currentPage = page[0];
-      d3.selectAll(".keyword").style("opacity", 0);
-      showHome();
-    } else if (currentPage == page[2]) {
-      currentPage = page[1];
-      d3.selectAll(".keyword").style("opacity", 1);
+    d3.select('svg').remove();
+    if (currentPage == 1) {
+      navigateTo(0);
+    } else if (currentPage == 2) {
+      navigateTo(1);
     }
   });
 });
