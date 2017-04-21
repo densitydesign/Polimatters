@@ -131,7 +131,7 @@ body {
   margin-right: 10%;
 }
 
-.toggle_language {
+.toggle_language a {
   color: #E0E0E0;
   position: absolute;
   bottom: 15px;
@@ -199,10 +199,36 @@ ul {
   color: #E0E0E0;
 }
 
+.timeline {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  bottom: 25px;
+  width: 75%;
+  text-align: center;
+  color: #E0E0E0;
+}
+
 .logo {
   position: absolute;
   bottom: 0;
   margin: 25px;
+}
+
+.brushAxis line {
+  stroke: #E0E0E0;
+  shape-rendering: crispEdges;
+}
+
+.brushAxis path {
+  stroke: #E0E0E0;
+  stroke-width: 2px;
+}
+
+.brushAxis text {
+  fill: #E0E0E0;
 }
 
 .searchbar {

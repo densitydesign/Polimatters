@@ -38,13 +38,6 @@ let design = [
 ];
 
 let engineering = [
-  "ingegneria meccanica",
-  "ingegneria chimica",
-  "ingegneria aeronautica",
-  "biomedical engineering - ingegneria biomedica",
-  "civil engineering for risk mitigation",
-  "computer science and engineering - ingegneria informatica",
-  "environmental and geomatic engineering",
   "ingegneria aeronautica",
   "ingegneria aerospaziale",
   "ingegneria biomedica",
@@ -65,10 +58,16 @@ let engineering = [
   "ingegneria gestionale",
   "ingegneria informatica",
   "ingegneria matematica",
+  "ingegneria meccanica",
+  "ingegneria biomedica",
   "ingegneria nucleare",
   "ingegneria per l'ambiente e il territorio",
   "ingegneria per l'ambiente e il territorio - environmental and land planning engineering",
   "ingegneria spaziale",
+  "biomedical engineering - ingegneria biomedica",
+  "civil engineering for risk mitigation",
+  "computer science and engineering - ingegneria informatica",
+  "environmental and geomatic engineering",
   "management engineering - ingegneria gestionale",
   "materials engineering and nanotechnology",
   "materials engineering and nanotechnology - ingegneria dei materiali e delle nanotecnologie",
@@ -116,376 +115,6 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
     total += final.total;
   });
 }).then(v => {
-  /* TEST */
-
-  // var timeLineData = [
-  //   { year: 2008, total: 100 },
-  //   { year: 2009, total: 200 },
-  //   { year: 2010, total: 400 },
-  //   { year: 2011, total: 200 },
-  //   { year: 2012, total: 300 },
-  //   { year: 2013, total: 200 },
-  //   { year: 2014, total: 100 },
-  //   { year: 2015, total: 400 },
-  //   { year: 2016, total: 100 }
-  // ];
-  //
-  //
-  // var flights = timeLineData;
-  // // Various formatters.
-  // const formatNumber = d3.format(',d');
-  //
-  // // A nest operator, for grouping the flight list.
-  // const nestByDate = d3.nest()
-  //   .key(d => d3.timeDay(d.date));
-  //
-  // // A little coercion, since the CSV is untyped.
-  // flights.forEach((d, i) => {
-  //   d.index = i;
-  //   d.year = d.year;
-  //   d.total = d.total;
-  // });
-  //
-  // // Create the crossfilter for the relevant dimensions and groups.
-  // const flight = crossfilter(flights);
-  //
-  // const all = flight.groupAll();
-  // const year = flight.dimension(d => Math.min(1999, d.year));
-  // const years = year.group(d => Math.floor(d / 50) * 50);
-  //
-  // console.log(year);
-  // console.log(years);
-  //
-  // const charts = [
-  //   barChart()
-  //    .dimension(year)
-  //    .group(years)
-  //    .x(d3.scaleLinear()
-  //      .domain([2008, 2016])
-  //      .rangeRound([0, 10 * 40])),
-  //
-  //       // TODO: Choose an approriate filter
-  //       // TODO: Animate this using a transition
-  // ];
-  //
-  // // Given our array of charts, which we assume are in the same order as the
-  // // .chart elements in the DOM, bind the charts to the DOM and render them.
-  // // We also listen to the chart's brush events to update the display.
-  // const chart = d3.selectAll('.chart')
-  //   .data(charts);
-  //
-  // // Render the initial lists.
-  // const list = d3.selectAll('.list')
-  //   .data([flightList]);
-  //
-  // // Render the total.
-  // d3.selectAll('#total')
-  //   .text(formatNumber(flight.size()));
-  //
-  // renderAll();
-  //
-  // // Renders the specified chart or list.
-  // function render(method) {
-  //   d3.select(this).call(method);
-  // }
-  //
-  // // Whenever the brush moves, re-rendering everything.
-  // function renderAll() {
-  //   chart.each(render);
-  //   list.each(render);
-  //   d3.select('#active').text(formatNumber(all.value()));
-  // }
-  //
-  // window.filter = filters => {
-  //   filters.forEach((d, i) => { charts[i].filter(d); });
-  //   renderAll();
-  // };
-  //
-  // window.reset = i => {
-  //   charts[i].filter(null);
-  //   renderAll();
-  // };
-  //
-  // function flightList(div) {
-  //   const flightsByDate = nestByDate.entries(date.top(40));
-  //
-  //   div.each(function () {
-  //     const date = d3.select(this).selectAll('.date')
-  //       .data(flightsByDate, d => d.key);
-  //
-  //     date.exit().remove();
-  //
-  //     date.enter().append('div')
-  //       .attr('class', 'date')
-  //       .append('div')
-  //         .attr('class', 'day')
-  //         .text(d => formatDate(d.values[0].date))
-  //       .merge(date);
-  //
-  //     const flight = date.order().selectAll('.flight')
-  //       .data(d => d.values, d => d.index);
-  //
-  //     flight.exit().remove();
-  //
-  //     const flightEnter = flight.enter().append('div')
-  //       .attr('class', 'flight');
-  //
-  //     flightEnter.append('div')
-  //       .attr('class', 'time')
-  //       .text(d => formatTime(d.date));
-  //
-  //     flightEnter.append('div')
-  //       .attr('class', 'origin')
-  //       .text(d => d.origin);
-  //
-  //     flightEnter.append('div')
-  //       .attr('class', 'destination')
-  //       .text(d => d.destination);
-  //
-  //     flightEnter.append('div')
-  //       .attr('class', 'distance')
-  //       .text(d => `${formatNumber(d.distance)} mi.`);
-  //
-  //     flightEnter.append('div')
-  //       .attr('class', 'delay')
-  //       .classed('early', d => d.delay < 0)
-  //       .text(d => `${formatChange(d.delay)} min.`);
-  //
-  //     flightEnter.merge(flight);
-  //
-  //     flight.order();
-  //   });
-  // }
-
-  /*
-  function barChart() {
-    if (!barChart.id) barChart.id = 0;
-
-    let margin = { top: 10, right: 13, bottom: 20, left: 10 };
-    let x;
-    let y = d3.scaleLinear().range([100, 0]);
-    const id = barChart.id++;
-    const axis = d3.axisBottom();
-    const brush = d3.brushX();
-    let brushDirty;
-    let dimension;
-    let group;
-    let round;
-    let gBrush;
-
-    function chart(div) {
-      const width = x.range()[1];
-      const height = y.range()[0];
-
-      brush.extent([[0, 0], [width, height]]);
-
-      y.domain([0, group.top(1)[0].value]);
-
-      div.each(function () {
-        const div = d3.select(this);
-        let g = div.select('g');
-
-        // Create the skeletal chart.
-        if (g.empty()) {
-          div.select('.title').append('a')
-            .attr('href', `javascript:reset(${id})`)
-            .attr('class', 'reset')
-            .text('reset')
-            .style('display', 'none');
-
-          g = div.append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-              .attr('transform', `translate(${margin.left},${margin.top})`);
-
-          g.append('clipPath')
-            .attr('id', `clip-${id}`)
-            .append('rect')
-              .attr('width', width)
-              .attr('height', height);
-
-          g.selectAll('.bar')
-            .data(['background', 'foreground'])
-            .enter().append('path')
-              .attr('class', d => `${d} bar`)
-              .datum(group.all());
-
-          g.selectAll('.foreground.bar')
-            .attr('clip-path', `url(#clip-${id})`);
-
-          g.append('g')
-            .attr('class', 'axis')
-            .attr('transform', `translate(0,${height})`)
-            .call(axis);
-
-          // Initialize the brush component with pretty resize handles.
-          gBrush = g.append('g')
-            .attr('class', 'brush')
-            .call(brush);
-
-          gBrush.selectAll('.handle--custom')
-            .data([{ type: 'w' }, { type: 'e' }])
-            .enter().append('path')
-              .attr('class', 'brush-handle')
-              .attr('cursor', 'ew-resize')
-              .attr('d', resizePath)
-              .style('display', 'none');
-        }
-
-        // Only redraw the brush if set externally.
-        if (brushDirty !== false) {
-          const filterVal = brushDirty;
-          brushDirty = false;
-
-          div.select('.title a').style('display', d3.brushSelection(div) ? null : 'none');
-
-          if (!filterVal) {
-            g.call(brush);
-
-            g.selectAll(`#clip-${id} rect`)
-              .attr('x', 0)
-              .attr('width', width);
-
-            g.selectAll('.brush-handle').style('display', 'none');
-            renderAll();
-          } else {
-            const range = filterVal.map(x);
-            brush.move(gBrush, range);
-          }
-        }
-
-        g.selectAll('.bar').attr('d', barPath);
-      });
-
-      function barPath(groups) {
-        const path = [];
-        let i = -1;
-        const n = groups.length;
-        let d;
-        while (++i < n) {
-          d = groups[i];
-          path.push('M', x(d.key), ',', height, 'V', y(d.value), 'h9V', height);
-        }
-        return path.join('');
-      }
-
-      function resizePath(d) {
-        const e = +(d.type === 'e');
-        const x = e ? 1 : -1;
-        const y = height / 3;
-        return `M${0.5 * x},${y}A6,6 0 0 ${e} ${6.5 * x},${y + 6}V${2 * y - 6}A6,6 0 0 ${e} ${0.5 * x},${2 * y}ZM${2.5 * x},${y + 8}V${2 * y - 8}M${4.5 * x},${y + 8}V${2 * y - 8}`;
-      }
-    }
-
-    brush.on('start.chart', function () {
-      const div = d3.select(this.parentNode.parentNode.parentNode);
-      div.select('.title a').style('display', null);
-    });
-
-    brush.on('brush.chart', function () {
-      const g = d3.select(this.parentNode);
-      const brushRange = d3.event.selection || d3.brushSelection(this); // attempt to read brush range
-      const xRange = x && x.range(); // attempt to read range from x scale
-      let activeRange = brushRange || xRange; // default to x range if no brush range available
-
-      const hasRange = activeRange &&
-        activeRange.length === 2 &&
-        !isNaN(activeRange[0]) &&
-        !isNaN(activeRange[1]);
-
-      if (!hasRange) return; // quit early if we don't have a valid range
-
-      // calculate current brush extents using x scale
-      let extents = activeRange.map(x.invert);
-
-      // if rounding fn supplied, then snap to rounded extents
-      // and move brush rect to reflect rounded range bounds if it was set by user interaction
-      if (round) {
-        extents = extents.map(round);
-        activeRange = extents.map(x);
-
-        if (
-          d3.event.sourceEvent &&
-          d3.event.sourceEvent.type === 'mousemove'
-        ) {
-          d3.select(this).call(brush.move, activeRange);
-        }
-      }
-
-      // move brush handles to start and end of range
-      g.selectAll('.brush-handle')
-        .style('display', null)
-        .attr('transform', (d, i) => `translate(${activeRange[i]}, 0)`);
-
-      // resize sliding window to reflect updated range
-      g.select(`#clip-${id} rect`)
-        .attr('x', activeRange[0])
-        .attr('width', activeRange[1] - activeRange[0]);
-
-      // filter the active dimension to the range extents
-      dimension.filterRange(extents);
-
-      // re-render the other charts accordingly
-      renderAll();
-    });
-
-    brush.on('end.chart', function () {
-      // reset corresponding filter if the brush selection was cleared
-      // (e.g. user "clicked off" the active range)
-      if (!d3.brushSelection(this)) {
-        reset(id);
-      }
-    });
-
-    chart.margin = function (_) {
-      if (!arguments.length) return margin;
-      margin = _;
-      return chart;
-    };
-
-    chart.x = function (_) {
-      if (!arguments.length) return x;
-      x = _;
-      axis.scale(x);
-      return chart;
-    };
-
-    chart.y = function (_) {
-      if (!arguments.length) return y;
-      y = _;
-      return chart;
-    };
-
-    chart.dimension = function (_) {
-      if (!arguments.length) return dimension;
-      dimension = _;
-      return chart;
-    };
-
-    chart.filter = _ => {
-      if (!_) dimension.filterAll();
-      brushDirty = _;
-      return chart;
-    };
-
-    chart.group = function (_) {
-      if (!arguments.length) return group;
-      group = _;
-      return chart;
-    };
-
-    chart.round = function (_) {
-      if (!arguments.length) return round;
-      round = _;
-      return chart;
-    };
-
-    chart.gBrush = () => gBrush;
-
-    return chart;
-  }
-  */
 
   size = d3.scaleSqrt()
     .domain([0, total])
@@ -599,6 +228,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
     svg.append("text")
       .attr("text-anchor", "middle")
+      .attr("pointer-events", "none")
       .attr("dx", d => { return center.x; })
       .attr("dy", d => { return center.y + 9; }) // + fonts size / 2? TODO
       .attr("opacity", 0)
@@ -617,6 +247,126 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
     initSVG();
 
+    /* Test Brush With Dummy Data */
+    var data = [
+      { year: 2008, total: 100 },
+      { year: 2009, total: 200 },
+      { year: 2010, total: 400 },
+      { year: 2011, total: 200 },
+      { year: 2012, total: 300 },
+      { year: 2013, total: 200 },
+      { year: 2014, total: 100 },
+      { year: 2015, total: 400 },
+      { year: 2016, total: 500 }
+    ];
+
+    var formatAxis = d3.format('.0f');
+
+    var margin = { top: 25, right: 25, bottom: 30, left: 25 },
+      width = $('#timeline').width() - margin.left - margin.right,
+      height = 50;
+
+    var x = d3.scaleTime().range([0, width]),
+        y = d3.scaleLinear().range([height, 0]);
+
+    var xAxis = d3.axisBottom(x).tickSize(0),
+        yAxis = d3.axisLeft(y).tickSize(0);
+
+    xAxis.tickFormat(formatAxis);
+
+    var brush = d3.brushX()
+        .extent([[0, 0], [width, height]])
+        .on("end", snapBrush)
+        .on("brush", brushed)
+
+    // TODO: Animate the brush
+
+    var svg = d3.select(".timeline").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+
+    var context = svg.append("g")
+        .attr("class", "context")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // var xMin = d3.min(data, function(d) { return d.year; });
+    var xMin = 2008;
+    var yMax = Math.max(20, d3.max(data, function(d) { return d.total; }));
+
+    x.domain([xMin, 2016]);
+    y.domain([0, yMax]);
+
+    var num_messages = function(dataArray, domainRange) { return d3.sum(dataArray, function(d) {
+        return d.total >= domainRange.domain()[0] && d.total <= domainRange.domain()[1];
+      });
+    }
+
+    var messages = context.append("g");
+       messages.attr("clip-path", "url(#clip)");
+       messages.selectAll("message")
+          .data(data)
+          .enter().append("circle")
+          .attr('class', 'messageContext')
+          .attr('fill', "#1DE9B6")
+          .attr("r", 5)
+          .style("opacity", 1)
+          .attr("cx", d => { return x(d.year); })
+          .attr("cy", d => { return y(d.total); })
+
+    context.append("g")
+          .attr("class", "brushAxis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+    context.append("g")
+          .attr("class", "brush")
+          .call(brush)
+          .call(brush.move, x.range());
+
+    function brushed() {
+      var s = d3.event.selection || x.range();
+      x.domain(s.map(x.invert, x));
+    }
+
+    function snapBrush() {
+      // TODO: Work on snap
+      // if (!d3.event.sourceEvent) return; // Only transition after input.
+      // if (!d3.event.selection) return; // Ignore empty selections.
+      // var d0 = d3.event.selection.map(x.invert),
+      //     d1 = d0.map(d3.timeDay.round);
+      //
+      // if (d1[0] >= d1[1]) {
+      //   d1[0] = d3.timeDay.floor(d0[0]);
+      //   d1[1] = d3.timeDay.offset(d1[0]);
+      // }
+      //
+      // d3.select(this).transition().call(d3.event.target.move, d1.map(x));
+    }
+
+    var i = 0;
+    d3.select(".brush").transition().call(brush.move, [0, i])
+      .on("end", animate);
+
+    // function animate() {
+    //   setTimeout(function () {
+    //     if (i < width) {
+    //       d3.select(".brush").transition().call(brush.move, [0, i += 1]);
+    //       animate();
+    //     }
+    //   }, 25);
+    // }
+
+    function animate() {
+      setTimeout(function () {
+        if (i < width) {
+          d3.select(".brush").transition().call(brush.move, [0, i += width / 8]);
+          animate();
+        }
+      }, 2000);
+    }
+
+    // End test
+
     tip
       .attr('class', 'd3-tip')
       .attr('id', 'tooltip')
@@ -633,16 +383,16 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       });
 
     var simulation = d3.forceSimulation()
-      .force("x", d3.forceX().strength(.2).x(bubble => {
+      .force("x", d3.forceX().strength(.1).x(bubble => {
         return bubble.positionX;
       }))
-      .force("y", d3.forceY().strength(.2).y(bubble => {
+      .force("y", d3.forceY().strength(.1).y(bubble => {
         return bubble.positionY;
       }))
-      .force("charge", d3.forceManyBody().strength(-5))
+      .force("charge", d3.forceManyBody().strength(1))
       .force("collide", d3.forceCollide().radius(bubble => {
-        return size(bubble.total) + 0.5;
-      }).iterations(2))
+        return size(bubble.total) + .75;
+      }).iterations(2));
       // .force("center", d3.forceCenter(center.x, center.y));
 
     simulation
@@ -671,7 +421,8 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       .data(bubbles)
       .enter()
       .append("text")
-        .attr("class", "keyword-text")
+      .attr("class", "keyword-text")
+        .attr("pointer-events", "none")
         .attr("text-anchor", d => {
           return faculties.includes(d.keyword) ? "middle" : "left";
         })
@@ -864,7 +615,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
         var engineeringPercent = (bubble.e/bubble.total) * window.innerWidth;
 
         // pallet - a 4 d 0 e 2
-        if (bubble.keyword = 'pallet') {
+        if (bubble.keyword == 'control') {
           console.log(bubble)
           console.log(architecturePercent / window.innerWidth)
           console.log(designPercent / window.innerWidth)
@@ -906,6 +657,8 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
           .attr("id", "legend")
           .attr("width", 500)
           .attr("height", 100);
+
+          console.log("legended")
 
         var circles = [
           { x: 30, y: 30, r: 10, color: "#00E5FF", label: "Degree Type" },
@@ -1069,6 +822,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
   }
 
   function navigateTo(navigate, bubble) {
+    d3.select('#timeline svg').remove();
     switch (navigate) {
       case 0:
         currentPage = 0;
