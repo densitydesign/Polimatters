@@ -1,13 +1,4 @@
-// Bubble object prototype
-function Bubble(keyword, architecture, design, engineering) {
-  this.keyword = keyword;
-  this.a = architecture;
-  this.d = design;
-  this.e = engineering;
-  this.total = a.total + d.total + e.total;
-}
-
-let center = [window.innerWidth / 2, window.innerHeight / 2];
+let center = { x: window.innerWidth / 2, y: window.innerHeight / 2};
 let colors = {
   "e": "#00FFCA",
   "a": "#FF3054",
@@ -74,7 +65,6 @@ let engineering = [
   "ingegneria gestionale",
   "ingegneria informatica",
   "ingegneria matematica",
-  "ingegneria meccanica",
   "ingegneria nucleare",
   "ingegneria per l'ambiente e il territorio",
   "ingegneria per l'ambiente e il territorio - environmental and land planning engineering",
@@ -101,26 +91,22 @@ var maximumYear = 2016;
 // Fetch data
 // 54325 keywords
 firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('value', snapshot => {
-// firebase.database().ref('/keywords').once('value', snapshot => {
   snapshot.forEach(keyword => {
     var word = keyword.val();
-    var final = {};
-    final.a = 0;
-    final.d = 0;
-    final.e = 0;
+    var final = { a: 0, d: 0, e: 0};
 
     architecture.forEach(course => {
-      if (_.includes(Object.keys(word), course))
+      if (Object.keys(word).includes(course))
         final.a += word[course];
     });
 
     design.forEach(course => {
-      if (_.includes(Object.keys(word), course))
+      if (Object.keys(word).includes(course))
         final.d += word[course];
     });
 
     engineering.forEach(course => {
-      if (_.includes(Object.keys(word), course))
+      if (Object.keys(word).includes(course))
         final.e += word[course];
     });
 
@@ -130,39 +116,376 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
     total += final.total;
   });
 }).then(v => {
-  // /* TEST */
-  // var data = [
-  //   {date: "2009", quantity: 2, total: 190, tip: 100, type: "tab"},
-  //   {date: "2010", quantity: 2, total: 190, tip: 100, type: "tab"},
-  //   {date: "2011", quantity: 1, total: 300, tip: 200, type: "visa"},
-  //   {date: "2012", quantity: 2, total: 90, tip: 0, type: "tab"},
-  //   {date: "2013", quantity: 2, total: 90, tip: 0, type: "tab"},
-  //   {date: "2014", quantity: 2, total: 90, tip: 0, type: "tab"},
-  //   {date: "2015", quantity: 2, total: 90, tip: 0, type: "tab"},
-  //   {date: "2016", quantity: 2, total: 90, tip: 0, type: "tab"}
+  /* TEST */
+
+  // var timeLineData = [
+  //   { year: 2008, total: 100 },
+  //   { year: 2009, total: 200 },
+  //   { year: 2010, total: 400 },
+  //   { year: 2011, total: 200 },
+  //   { year: 2012, total: 300 },
+  //   { year: 2013, total: 200 },
+  //   { year: 2014, total: 100 },
+  //   { year: 2015, total: 400 },
+  //   { year: 2016, total: 100 }
   // ];
   //
-  // const formatDate = d3.timeFormat('%B %d, %Y');
   //
-  // console.log(data);
+  // var flights = timeLineData;
+  // // Various formatters.
+  // const formatNumber = d3.format(',d');
   //
-  // var filter = crossfilter(data);
+  // // A nest operator, for grouping the flight list.
+  // const nestByDate = d3.nest()
+  //   .key(d => d3.timeDay(d.date));
   //
-  // const date = filter.dimension(d => d.date);
-  // const dates = date.group(d3.timeDay);
-  // filter = filter.dimension(function(d) { return d.total; });
+  // // A little coercion, since the CSV is untyped.
+  // flights.forEach((d, i) => {
+  //   d.index = i;
+  //   d.year = d.year;
+  //   d.total = d.total;
+  // });
   //
-  // var chart = barChart()
-  //     .dimension(date)
-  //     .group(dates)
-  //     .round(d3.timeDay.round)
-  //     .x(d3.scaleTime()
-  //       .domain([2008, 2016])
-  //       .rangeRound([0, 10 * 90]))
-  //     .filter([new Date(2001, 1, 1), new Date(2001, 2, 1)]);
+  // // Create the crossfilter for the relevant dimensions and groups.
+  // const flight = crossfilter(flights);
   //
-  // d3.select(".chartBar").data(chart)
-  //     .each(function(chart) { chart.on("brush", function(d) {}).on("brushend", function(d) {}); });
+  // const all = flight.groupAll();
+  // const year = flight.dimension(d => Math.min(1999, d.year));
+  // const years = year.group(d => Math.floor(d / 50) * 50);
+  //
+  // console.log(year);
+  // console.log(years);
+  //
+  // const charts = [
+  //   barChart()
+  //    .dimension(year)
+  //    .group(years)
+  //    .x(d3.scaleLinear()
+  //      .domain([2008, 2016])
+  //      .rangeRound([0, 10 * 40])),
+  //
+  //       // TODO: Choose an approriate filter
+  //       // TODO: Animate this using a transition
+  // ];
+  //
+  // // Given our array of charts, which we assume are in the same order as the
+  // // .chart elements in the DOM, bind the charts to the DOM and render them.
+  // // We also listen to the chart's brush events to update the display.
+  // const chart = d3.selectAll('.chart')
+  //   .data(charts);
+  //
+  // // Render the initial lists.
+  // const list = d3.selectAll('.list')
+  //   .data([flightList]);
+  //
+  // // Render the total.
+  // d3.selectAll('#total')
+  //   .text(formatNumber(flight.size()));
+  //
+  // renderAll();
+  //
+  // // Renders the specified chart or list.
+  // function render(method) {
+  //   d3.select(this).call(method);
+  // }
+  //
+  // // Whenever the brush moves, re-rendering everything.
+  // function renderAll() {
+  //   chart.each(render);
+  //   list.each(render);
+  //   d3.select('#active').text(formatNumber(all.value()));
+  // }
+  //
+  // window.filter = filters => {
+  //   filters.forEach((d, i) => { charts[i].filter(d); });
+  //   renderAll();
+  // };
+  //
+  // window.reset = i => {
+  //   charts[i].filter(null);
+  //   renderAll();
+  // };
+  //
+  // function flightList(div) {
+  //   const flightsByDate = nestByDate.entries(date.top(40));
+  //
+  //   div.each(function () {
+  //     const date = d3.select(this).selectAll('.date')
+  //       .data(flightsByDate, d => d.key);
+  //
+  //     date.exit().remove();
+  //
+  //     date.enter().append('div')
+  //       .attr('class', 'date')
+  //       .append('div')
+  //         .attr('class', 'day')
+  //         .text(d => formatDate(d.values[0].date))
+  //       .merge(date);
+  //
+  //     const flight = date.order().selectAll('.flight')
+  //       .data(d => d.values, d => d.index);
+  //
+  //     flight.exit().remove();
+  //
+  //     const flightEnter = flight.enter().append('div')
+  //       .attr('class', 'flight');
+  //
+  //     flightEnter.append('div')
+  //       .attr('class', 'time')
+  //       .text(d => formatTime(d.date));
+  //
+  //     flightEnter.append('div')
+  //       .attr('class', 'origin')
+  //       .text(d => d.origin);
+  //
+  //     flightEnter.append('div')
+  //       .attr('class', 'destination')
+  //       .text(d => d.destination);
+  //
+  //     flightEnter.append('div')
+  //       .attr('class', 'distance')
+  //       .text(d => `${formatNumber(d.distance)} mi.`);
+  //
+  //     flightEnter.append('div')
+  //       .attr('class', 'delay')
+  //       .classed('early', d => d.delay < 0)
+  //       .text(d => `${formatChange(d.delay)} min.`);
+  //
+  //     flightEnter.merge(flight);
+  //
+  //     flight.order();
+  //   });
+  // }
+
+  /*
+  function barChart() {
+    if (!barChart.id) barChart.id = 0;
+
+    let margin = { top: 10, right: 13, bottom: 20, left: 10 };
+    let x;
+    let y = d3.scaleLinear().range([100, 0]);
+    const id = barChart.id++;
+    const axis = d3.axisBottom();
+    const brush = d3.brushX();
+    let brushDirty;
+    let dimension;
+    let group;
+    let round;
+    let gBrush;
+
+    function chart(div) {
+      const width = x.range()[1];
+      const height = y.range()[0];
+
+      brush.extent([[0, 0], [width, height]]);
+
+      y.domain([0, group.top(1)[0].value]);
+
+      div.each(function () {
+        const div = d3.select(this);
+        let g = div.select('g');
+
+        // Create the skeletal chart.
+        if (g.empty()) {
+          div.select('.title').append('a')
+            .attr('href', `javascript:reset(${id})`)
+            .attr('class', 'reset')
+            .text('reset')
+            .style('display', 'none');
+
+          g = div.append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+              .attr('transform', `translate(${margin.left},${margin.top})`);
+
+          g.append('clipPath')
+            .attr('id', `clip-${id}`)
+            .append('rect')
+              .attr('width', width)
+              .attr('height', height);
+
+          g.selectAll('.bar')
+            .data(['background', 'foreground'])
+            .enter().append('path')
+              .attr('class', d => `${d} bar`)
+              .datum(group.all());
+
+          g.selectAll('.foreground.bar')
+            .attr('clip-path', `url(#clip-${id})`);
+
+          g.append('g')
+            .attr('class', 'axis')
+            .attr('transform', `translate(0,${height})`)
+            .call(axis);
+
+          // Initialize the brush component with pretty resize handles.
+          gBrush = g.append('g')
+            .attr('class', 'brush')
+            .call(brush);
+
+          gBrush.selectAll('.handle--custom')
+            .data([{ type: 'w' }, { type: 'e' }])
+            .enter().append('path')
+              .attr('class', 'brush-handle')
+              .attr('cursor', 'ew-resize')
+              .attr('d', resizePath)
+              .style('display', 'none');
+        }
+
+        // Only redraw the brush if set externally.
+        if (brushDirty !== false) {
+          const filterVal = brushDirty;
+          brushDirty = false;
+
+          div.select('.title a').style('display', d3.brushSelection(div) ? null : 'none');
+
+          if (!filterVal) {
+            g.call(brush);
+
+            g.selectAll(`#clip-${id} rect`)
+              .attr('x', 0)
+              .attr('width', width);
+
+            g.selectAll('.brush-handle').style('display', 'none');
+            renderAll();
+          } else {
+            const range = filterVal.map(x);
+            brush.move(gBrush, range);
+          }
+        }
+
+        g.selectAll('.bar').attr('d', barPath);
+      });
+
+      function barPath(groups) {
+        const path = [];
+        let i = -1;
+        const n = groups.length;
+        let d;
+        while (++i < n) {
+          d = groups[i];
+          path.push('M', x(d.key), ',', height, 'V', y(d.value), 'h9V', height);
+        }
+        return path.join('');
+      }
+
+      function resizePath(d) {
+        const e = +(d.type === 'e');
+        const x = e ? 1 : -1;
+        const y = height / 3;
+        return `M${0.5 * x},${y}A6,6 0 0 ${e} ${6.5 * x},${y + 6}V${2 * y - 6}A6,6 0 0 ${e} ${0.5 * x},${2 * y}ZM${2.5 * x},${y + 8}V${2 * y - 8}M${4.5 * x},${y + 8}V${2 * y - 8}`;
+      }
+    }
+
+    brush.on('start.chart', function () {
+      const div = d3.select(this.parentNode.parentNode.parentNode);
+      div.select('.title a').style('display', null);
+    });
+
+    brush.on('brush.chart', function () {
+      const g = d3.select(this.parentNode);
+      const brushRange = d3.event.selection || d3.brushSelection(this); // attempt to read brush range
+      const xRange = x && x.range(); // attempt to read range from x scale
+      let activeRange = brushRange || xRange; // default to x range if no brush range available
+
+      const hasRange = activeRange &&
+        activeRange.length === 2 &&
+        !isNaN(activeRange[0]) &&
+        !isNaN(activeRange[1]);
+
+      if (!hasRange) return; // quit early if we don't have a valid range
+
+      // calculate current brush extents using x scale
+      let extents = activeRange.map(x.invert);
+
+      // if rounding fn supplied, then snap to rounded extents
+      // and move brush rect to reflect rounded range bounds if it was set by user interaction
+      if (round) {
+        extents = extents.map(round);
+        activeRange = extents.map(x);
+
+        if (
+          d3.event.sourceEvent &&
+          d3.event.sourceEvent.type === 'mousemove'
+        ) {
+          d3.select(this).call(brush.move, activeRange);
+        }
+      }
+
+      // move brush handles to start and end of range
+      g.selectAll('.brush-handle')
+        .style('display', null)
+        .attr('transform', (d, i) => `translate(${activeRange[i]}, 0)`);
+
+      // resize sliding window to reflect updated range
+      g.select(`#clip-${id} rect`)
+        .attr('x', activeRange[0])
+        .attr('width', activeRange[1] - activeRange[0]);
+
+      // filter the active dimension to the range extents
+      dimension.filterRange(extents);
+
+      // re-render the other charts accordingly
+      renderAll();
+    });
+
+    brush.on('end.chart', function () {
+      // reset corresponding filter if the brush selection was cleared
+      // (e.g. user "clicked off" the active range)
+      if (!d3.brushSelection(this)) {
+        reset(id);
+      }
+    });
+
+    chart.margin = function (_) {
+      if (!arguments.length) return margin;
+      margin = _;
+      return chart;
+    };
+
+    chart.x = function (_) {
+      if (!arguments.length) return x;
+      x = _;
+      axis.scale(x);
+      return chart;
+    };
+
+    chart.y = function (_) {
+      if (!arguments.length) return y;
+      y = _;
+      return chart;
+    };
+
+    chart.dimension = function (_) {
+      if (!arguments.length) return dimension;
+      dimension = _;
+      return chart;
+    };
+
+    chart.filter = _ => {
+      if (!_) dimension.filterAll();
+      brushDirty = _;
+      return chart;
+    };
+
+    chart.group = function (_) {
+      if (!arguments.length) return group;
+      group = _;
+      return chart;
+    };
+
+    chart.round = function (_) {
+      if (!arguments.length) return round;
+      round = _;
+      return chart;
+    };
+
+    chart.gBrush = () => gBrush;
+
+    return chart;
+  }
+  */
 
   size = d3.scaleSqrt()
     .domain([0, total])
@@ -170,10 +493,13 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
   // Faculties circles
   faculties.forEach(function(faculty, index) {
-    facultyNodes[faculty] = [center[0] + radius * Math.cos(2 * Math.PI * (index / faculties.length)), center[1] + radius * Math.sin(2 * Math.PI * (index / faculties.length))]
+    facultyNodes[faculty] = {
+      x: center.x + radius * Math.cos(2 * Math.PI * (index / faculties.length)),
+      y: center.y + radius * Math.sin(2 * Math.PI * (index / faculties.length))
+    }
   });
 
-  keywords.forEach(function(keyword) {
+  keywords.forEach(keyword => {
     let upX = 0;
     let upY = 0;
     let down = 0;
@@ -183,11 +509,11 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
     var keys = Object.keys(keyword);
 
-    faculties.forEach(function(faculty) {
-      // Figure out faculties a keyword belongs to
+    faculties.forEach(faculty => {
+      // Figure out what faculties a keyword belongs to
       var multiplier = parseFloat(keyword[faculty] / keyword.total);
-      upX += multiplier * facultyNodes[faculty][0]; // X
-      upY += multiplier * facultyNodes[faculty][1]; // Y
+      upX += multiplier * facultyNodes[faculty].x;
+      upY += multiplier * facultyNodes[faculty].y;
       colorRed += multiplier * d3.color(colors[faculty]).r;
       colorGreen += multiplier * d3.color(colors[faculty]).g;
       colorBlue += multiplier * d3.color(colors[faculty]).b;
@@ -198,7 +524,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
     keyword.positionY = upY / down;
 
     let color = d3.rgb(colorRed, colorGreen, colorBlue);
-    let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center[0], 2) + Math.pow(keyword.positionY - center[1], 2));
+    let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center.x, 2) + Math.pow(keyword.positionY - center.y, 2));
     keyword.color = color.brighter(lightness / 0.0080);
   });
 
@@ -209,8 +535,8 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
     bubbles.push({
       keyword: key,
       type: "focus",
-      positionX: value[0],
-      positionY: value[1],
+      positionX: value.x,
+      positionY: value.y,
       total: 2000, // TODO To be calculated dynamically with a coefficient to scale.
       color: colors[key]
     });
@@ -254,12 +580,12 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
     // Polimi Circle
     var polimiBubble = svg.append("ellipse")
-      .attr("cx", center[0])
-      .attr("cy", center[1])
+      .attr("cx", center.x)
+      .attr("cy", center.y)
       .attr("rx", 0)
       .attr("ry", 0)
       .attr("fill", "#E1BEE7")
-      .on("click", function(d) {
+      .on("click", d => {
         $('#title').hide();
         $('#intro').hide();
         $('#credits').hide();
@@ -273,13 +599,13 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
     svg.append("text")
       .attr("text-anchor", "middle")
-      .attr("dx", function(d) { return center[0]; })
-      .attr("dy", function(d) { return center[1] + 5; })
+      .attr("dx", d => { return center.x; })
+      .attr("dy", d => { return center.y + 9; }) // + fonts size / 2? TODO
       .attr("opacity", 0)
       .attr("font-family", "Poiret One")
       .attr("font-size", 18)
-      .text(function(d) { return "Politecnico di Milano"; })
-      .style("fill", function(d) { return "#E0E0E0"; })
+      .text(d => { return "Politecnico di Milano"; })
+      .style("fill", d => { return "#E0E0E0"; })
       .transition()
         .attr("opacity", 1);
 
@@ -295,7 +621,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       .attr('class', 'd3-tip')
       .attr('id', 'tooltip')
       .offset([-10, 0])
-      .html(function(bubble) {
+      .html(bubble => {
         if (faculties.includes(bubble.keyword)) {
           var department;
           if (bubble.keyword == 'a') department = 'Architecture';
@@ -307,17 +633,17 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       });
 
     var simulation = d3.forceSimulation()
-      .force("x", d3.forceX().strength(.2).x(function(bubble) {
+      .force("x", d3.forceX().strength(.2).x(bubble => {
         return bubble.positionX;
       }))
-      .force("y", d3.forceY().strength(.2).y(function(bubble) {
+      .force("y", d3.forceY().strength(.2).y(bubble => {
         return bubble.positionY;
       }))
-      .force("charge", d3.forceManyBody().strength(0))
-      .force("collide", d3.forceCollide().radius(function(bubble) {
+      .force("charge", d3.forceManyBody().strength(-5))
+      .force("collide", d3.forceCollide().radius(bubble => {
         return size(bubble.total) + 0.5;
       }).iterations(2))
-      .force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight / 2));
+      // .force("center", d3.forceCenter(center.x, center.y));
 
     simulation
       .nodes(bubbles)
@@ -328,13 +654,13 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       .enter()
       .append("circle")
         .attr("class", "keyword")
-        .attr("r", function(bubble) {
+        .attr("r", bubble => {
           return size(bubble.total);
         })
-        .style("fill", function(bubble) {
+        .style("fill", bubble => {
           return bubble.color;
         })
-        .on('click', function(bubble) {
+        .on('click', bubble => {
           navigateTo(2, bubble);
         })
         .on('mouseenter', tip.show)
@@ -346,30 +672,29 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       .enter()
       .append("text")
         .attr("class", "keyword-text")
-        .attr("text-anchor", function(d) {
-          if (faculties.includes(d.keyword)) return "middle";
-          else return "left";
+        .attr("text-anchor", d => {
+          return faculties.includes(d.keyword) ? "middle" : "left";
         })
         .attr("font-family", "Poiret One")
         .attr("font-size", 15)
-        .text(function(d) {
+        .text(d => {
           if (d.keyword == 'a') return "Architecture";
           else if (d.keyword == 'd') return "Design";
           else if (d.keyword == 'e') return "Engineering";
           else if (d.total > 40) return d.keyword;
         })
-        .style("fill", function(d) { return "#E0E0E0"; });
+        .style("fill", d => { return d.keyword == 'a' || d.keyword == 'd' || d.keyword == 'e' ? "#212121" : "#E0E0E0"; });
 
     function ticked() {
-      bubble.attr("cx", function(bubble) {
+      bubble.attr("cx", bubble => {
         return bubble.x;
-      }).attr("cy", function(bubble) {
+      }).attr("cy", bubble => {
         return bubble.y;
       });
-      text.attr("x", function(text) {
+      text.attr("x", text => {
         if (faculties.includes(text.keyword)) return text.x;
         return text.x + size(text.total) + 5;
-      }).attr("y", function(text) {
+      }).attr("y", text => {
         return text.y + 6;
       });
     }
@@ -379,13 +704,13 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
     // Tincy rotation
     var speed = 0;
     // d3.timer(function() {
-    //   svg.fill
     //   svg.style("transform", "rotate(" + speed + "deg)");
     //   speed -= .0125;
     // });
   }
 
-  function exploreKeyword(keyword) {
+  function exploreKeyword(bubble) {
+    var keyword = bubble.keyword;
     console.log(keyword);
 
     d3.select('svg').remove();
@@ -393,7 +718,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
     // Fetch firebase metadata
     firebase.database().ref('metadata/' + keyword).once('value')
-      .then(function(snapshot) {
+      .then(snapshot => {
         // The types of nodes in the alluvial chart
         var keyword_node = [];
         var degree_type = [];
@@ -515,7 +840,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
         // format variables
         var formatNumber = d3.format(",.0f"), // zero decimal places
-          format = function(d) {
+          format = d => {
             return formatNumber(d) + " " + units;
           },
           color = d3.scaleOrdinal(d3.schemeCategory20);
@@ -527,6 +852,55 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
           .append("g")
           .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
+
+        // TODO: Create a bar on top to show the occurrence of the selected keyword in the schools
+        var bar = d3.select(".frequency_bar").append("svg")
+          .attr("id", "frequency_bar")
+          .attr("width", window.innerWidth)
+          .attr("height", 18);
+
+        var architecturePercent = (bubble.a/bubble.total) * window.innerWidth;
+        var designPercent = (bubble.d/bubble.total) * window.innerWidth;
+        var engineeringPercent = (bubble.e/bubble.total) * window.innerWidth;
+
+        // pallet - a 4 d 0 e 2
+        if (bubble.keyword = 'pallet') {
+          console.log(bubble)
+          console.log(architecturePercent / window.innerWidth)
+          console.log(designPercent / window.innerWidth)
+          console.log(engineeringPercent / window.innerWidth)
+        }
+
+        var bars = [
+          {x: 0, width: architecturePercent, color: colors.a, label: "Architecture"},
+          {x: architecturePercent, width: designPercent, color: colors.d, label: "Design"},
+          {x: architecturePercent + designPercent, width: engineeringPercent, color: colors.e, label: "Engineering"}
+        ]
+
+        bar.selectAll("rect")
+          .data(bars)
+          .enter()
+          .append("rect")
+            .attr("id", "frequency_bar")
+            .attr("x", d => { return d.x; })
+            .attr("y", 0)
+            .attr("width", d => { return d.width; })
+            .attr("height", 75)
+            .style("fill", d => { return d.color; });
+
+        bar.selectAll("text")
+          .data(bars)
+          .enter()
+          .append("text")
+            .attr("dx", d => { return d.x + 25; })
+            .attr("dy", 15)
+            .attr("opacity", 0)
+            .attr("font-family", "Poiret One")
+            .attr("font-size", 15)
+            .text(d => { if (d.width != 0) return d.label + ": " + Math.round(d.width/window.innerWidth * 100 * 100) / 100 + "%"; })
+            .style("fill", "#212121")
+            .transition()
+              .attr("opacity", 1);
 
         var legendContainer = d3.select(".alluvial_legend").append("svg")
           .attr("id", "legend")
@@ -544,20 +918,20 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
           .data(circles)
           .enter()
           .append("circle")
-            .attr("cx", function (d) { return d.x; })
-            .attr("cy", function (d) { return d.y; })
-            .attr("r", function (d) { return d.r; })
-            .style("fill", function(d) { return d.color; });
+            .attr("cx", d => { return d.x; })
+            .attr("cy", d => { return d.y; })
+            .attr("r", d => { return d.r; })
+            .style("fill", d => { return d.color; });
 
         legendContainer.selectAll("text")
           .data(circles)
           .enter()
           .append("text")
-            .attr("dx", function(d) { return d.x + 25; })
-            .attr("dy", function(d) { return d.y + 5; })
+            .attr("dx", d => { return d.x + 25; })
+            .attr("dy", d => { return d.y + 5; })
             .attr("font-family", "Poiret One")
-            .text(function(d) { return d.label; })
-            .style("fill", function(d) { return "#E0E0E0"; });
+            .text(d => { return d.label; })
+            .style("fill", d => { return "#E0E0E0"; });
 
         d3.select(".visualisation")
           .attr("align", "center");
@@ -581,7 +955,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
           .enter().append("path")
           .attr("class", "link")
           .attr("d", path)
-          .style("stroke-width", function(d) {
+          .style("stroke-width", d => {
             return Math.max(1, d.dy);
           })
           .sort(function(a, b) {
@@ -590,7 +964,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
         // add the link titles
         link.append("title")
-          .text(function(d) {
+          .text(d => {
             return d.source.name + " → " +
               d.target.name + "\n" + format(d.value);
           });
@@ -600,14 +974,14 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
           .data(graph.nodes)
           .enter().append("g")
           .attr("class", "node")
-          .attr("transform", function(d) {
+          .attr("transform", d => {
             return "translate(" + d.x + "," + d.y + ")";
           })
           .call(d3.drag()
-            .subject(function(d) {
+            .subject(d => {
               return d;
             })
-            .on("start", function() {
+            .on("start", d => {
               this.parentNode.appendChild(this);
             })
             .on("drag", dragmove)
@@ -615,11 +989,11 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
 
         // add the rectangles for the nodes
         node.append("rect")
-          .attr("height", function(d) {
+          .attr("height", d => {
             return d.dy;
           })
           .attr("width", sankey.nodeWidth())
-          .style("fill", function(d) {
+          .style("fill", d => {
             // return d.color = color(d.name.replace(/ .*/, ""));
 
             if (uniqueDegreeTypes.includes(d.name)) {
@@ -634,7 +1008,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
               return d3.rgb('#FF3D00');
             }
           })
-          .style("stroke", function(d) {
+          .style("stroke", d => {
             if (uniqueDegreeTypes.includes(d.name)) {
               return d3.rgb('#00E5FF');
             } else if (uniqueSchools.includes(d.name)) {
@@ -648,7 +1022,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
             }
           })
           .append("title")
-          .text(function(d) {
+          .text(d => {
             return d.name + "\n" + format(d.value);
           });
 
@@ -656,16 +1030,16 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
         node.append("text")
           .style("fill", '#E0E0E0')
           .attr("x", -6)
-          .attr("y", function(d) {
+          .attr("y", d => {
             return d.dy / 2;
           })
           .attr("dy", ".35em")
           .attr("text-anchor", "end")
           .attr("transform", null)
-          .text(function(d) {
+          .text(d => {
             return d.name;
           })
-          .filter(function(d) {
+          .filter(d => {
             return d.x < width / 2;
           })
           .attr("x", 6 + sankey.nodeWidth())
@@ -683,7 +1057,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
           link.attr("d", path);
         }
       })
-      .catch(function(e) {
+      .catch(e => {
         console.log("Failed to fetch :( " + e);
       });
   }
@@ -702,6 +1076,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
         $('#searchbar').hide();
         $('#alluvial_legend').hide();
         showHome();
+        d3.select('#frequency_bar').remove();
         d3.select('#tooltip').remove();
         break;
       case 1:
@@ -715,9 +1090,10 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
           .attr("rx", 0)
           .attr("ry", 0)
           .style("fill", "#E1BEE7")
-          .on("end", function(d) {
+          .on("end", d => {
             d3.select("svg").remove();
           });
+          d3.select('#frequency_bar').remove();
           d3.select('#tooltip').remove();
           showForceLayout();
         break;
@@ -732,13 +1108,13 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
         if (!faculties.includes(bubble.keyword)) {
           $("#back").show();
           d3.selectAll(".keyword").remove();
-          exploreKeyword(bubble.keyword);
+          exploreKeyword(bubble);
         }
         break;
     }
   }
 
-  $("#back").click(function(d) {
+  $("#back").click(d => {
     d3.select('svg').remove();
     if (currentPage == 1) {
       navigateTo(0);

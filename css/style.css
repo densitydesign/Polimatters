@@ -1,3 +1,112 @@
+/* Test */
+#charts {
+ padding: 10px 0;
+}
+
+.chart {
+ display: inline-block;
+ height: 151px;
+ margin-bottom: 20px;
+}
+
+.reset {
+ padding-left: 1em;
+ font-size: smaller;
+ color: #ccc;
+}
+
+.background.bar {
+ fill: #ccc;
+}
+
+.foreground.bar {
+ fill: steelblue;
+}
+
+.brush-handle {
+ fill: #eee;
+ stroke: #666;
+}
+
+#hour-chart {
+ width: 260px;
+}
+
+#delay-chart {
+ width: 230px;
+}
+
+#distance-chart {
+ width: 430px;
+}
+
+#date-chart {
+ width: 920px;
+}
+
+#flight-list {
+ min-height: 1024px;
+}
+
+#flight-list .date,
+#flight-list .day {
+ margin-bottom: .4em;
+}
+
+#flight-list .flight {
+ line-height: 1.5em;
+ background: #eee;
+ width: 925px;
+ margin-bottom: 1px;
+}
+
+#flight-list .time {
+ color: #999;
+}
+
+#flight-list .flight div {
+ display: inline-block;
+}
+
+#flight-list div.time {
+ width: 100px;
+ text-align: left;
+}
+
+#flight-list div.origin {
+ width: 50px;
+ text-align: right;
+ padding-right: 15px;
+}
+
+#flight-list div.destination {
+ width: 100px;
+ text-align: left;
+ padding-left: 15px;
+}
+
+#flight-list div.distance {
+ width: 100px;
+ text-align: left;
+}
+
+#flight-list div.delay {
+ width: 120px;
+ padding-right: 0px;
+ text-align: right;
+}
+
+#flight-list .early {
+ color: green;
+}
+
+aside {
+ position: absolute;
+ left: 740px;
+ font-size: smaller;
+ width: 220px;
+}
+
 body {
   background: #212121;
   max-height: 100%;
@@ -36,23 +145,6 @@ body {
   left: 0;
 }
 
-.toggle_sidebar {
-  display: none;
-  position: absolute;
-  right: 0;
-}
-
-.slider {
-  bottom: 25px;
-  position: absolute;
-  margin-left: auto;
-  margin-right: auto;
-  left: 0;
-  right: 0;
-  width: 75% !important;
-  display: none;
-}
-
 #back {
   border: 0;
   outline: 0;
@@ -67,12 +159,10 @@ body {
   margin: 75px;
 }
 
-.sidebar {
-  margin: 35px;
+.frequency_bar {
   position: absolute;
-  right: 0;
-  color: #E0E0E0;
-  display: none;
+  top: 0;
+  left: 0;
 }
 
 ul {
