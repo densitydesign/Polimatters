@@ -75,6 +75,17 @@ let engineering = [
   "telecommunication engineering - ingegneria delle telecomunicazioni"
 ];
 
+let years = [
+  "2008-2009",
+  "2009-2010",
+  "2010-2011",
+  "2011-2012",
+  "2012-2013",
+  "2013-2014",
+  "2014-2015",
+  "2015-2016"
+];
+
 let facultyNodes = {};
 let keywords = [];
 let radius = (window.innerWidth / 2) * .4;
@@ -89,32 +100,52 @@ var maximumYear = 2016;
 
 // Fetch data
 // 54325 keywords
-firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('value', snapshot => {
+firebase.database().ref('/keywords').once('value', snapshot => {
   snapshot.forEach(keyword => {
-    var word = keyword.val();
-    var final = { a: 0, d: 0, e: 0};
 
-    architecture.forEach(course => {
-      if (Object.keys(word).includes(course))
-        final.a += word[course];
+    var year_node = { total: 0 };
+
+    // Split by years
+    years.forEach(year => {
+      if (keyword.val()[year]) {
+        var word = keyword.val()[year];
+        // var json_year = '{ "' + year + '" : { "a": 0, "d" : 0, "e" : 0, "total": 0 } }';
+        year_node[year] = {
+          a: 0,
+          d: 0,
+          e: 0,
+          total: 0
+        }
+
+        architecture.forEach(course => {
+          if (Object.keys(word).includes(course))
+            year_node[year].a += word[course];
+        });
+
+        design.forEach(course => {
+          if (Object.keys(word).includes(course))
+            year_node[year].d += word[course];
+        });
+
+        engineering.forEach(course => {
+          if (Object.keys(word).includes(course))
+            year_node[year].e += word[course];
+        });
+
+        year_node.keyword = keyword.key;
+        year_node[year].keyword = keyword.key;
+        year_node[year].total = word.total;
+        year_node.total += year_node[year].total;
+
+        if (year_node.total >= 10) {
+          total += year_node.total;
+          keywords.push(year_node);
+        }
+      }
     });
-
-    design.forEach(course => {
-      if (Object.keys(word).includes(course))
-        final.d += word[course];
-    });
-
-    engineering.forEach(course => {
-      if (Object.keys(word).includes(course))
-        final.e += word[course];
-    });
-
-    final.keyword = keyword.key;
-    final.total = word.total;
-    keywords.push(final);
-    total += final.total;
   });
 }).then(v => {
+  total = 5500;
 
   size = d3.scaleSqrt()
     .domain([0, total])
@@ -126,49 +157,6 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       x: center.x + radius * Math.cos(2 * Math.PI * (index / faculties.length)),
       y: center.y + radius * Math.sin(2 * Math.PI * (index / faculties.length))
     }
-  });
-
-  keywords.forEach(keyword => {
-    let upX = 0;
-    let upY = 0;
-    let down = 0;
-    let colorRed = 0;
-    let colorGreen = 0;
-    let colorBlue = 0;
-
-    var keys = Object.keys(keyword);
-
-    faculties.forEach(faculty => {
-      // Figure out what faculties a keyword belongs to
-      var multiplier = parseFloat(keyword[faculty] / keyword.total);
-      upX += multiplier * facultyNodes[faculty].x;
-      upY += multiplier * facultyNodes[faculty].y;
-      colorRed += multiplier * d3.color(colors[faculty]).r;
-      colorGreen += multiplier * d3.color(colors[faculty]).g;
-      colorBlue += multiplier * d3.color(colors[faculty]).b;
-      down += multiplier;
-    });
-
-    keyword.positionX = upX / down;
-    keyword.positionY = upY / down;
-
-    let color = d3.rgb(colorRed, colorGreen, colorBlue);
-    let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center.x, 2) + Math.pow(keyword.positionY - center.y, 2));
-    keyword.color = color.brighter(lightness / 0.0080);
-  });
-
-  var bubbles = keywords;
-
-  _.forEach(facultyNodes, function(value, key) {
-    // Push the faculty nodes into the set of keywords (so that they can be mapped together)
-    bubbles.push({
-      keyword: key,
-      type: "focus",
-      positionX: value.x,
-      positionY: value.y,
-      total: 2000, // TODO To be calculated dynamically with a coefficient to scale.
-      color: colors[key]
-    });
   });
 
   var tip = d3.tip();
@@ -245,6 +233,67 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
   function showForceLayout() {
     currentPage = 1;
 
+    keywords.forEach(keyword => {
+      let multiplier = 0;
+      let upX = 0;
+      let upY = 0;
+      let down = 0;
+      let colorRed = 0;
+      let colorGreen = 0;
+      let colorBlue = 0;
+      let schools = { a: 0, d: 0, e: 0 };
+      let totalOccurrence = 0;
+
+
+      // loop through the chosen years and find out the total and the ratio for the multiplier! :D
+      // TEST for all years
+      years.forEach(year => {
+        if (keyword[year]) {
+          totalOccurrence += keyword[year].total;
+          schools.a += keyword[year].a;
+          schools.d += keyword[year].d;
+          schools.e += keyword[year].e;
+        }
+      });
+
+      faculties.forEach(faculty => {
+       // Figure out what faculties a keyword belongs to
+       var multiplier = parseFloat(schools[faculty] / totalOccurrence);
+       upX += multiplier * facultyNodes[faculty].x;
+       upY += multiplier * facultyNodes[faculty].y;
+       colorRed += multiplier * d3.color(colors[faculty]).r;
+       colorGreen += multiplier * d3.color(colors[faculty]).g;
+       colorBlue += multiplier * d3.color(colors[faculty]).b;
+       down += multiplier;
+     });
+
+      keyword.positionX = upX / down;
+      keyword.positionY = upY / down;
+      keyword.a = schools.a;
+      keyword.d = schools.d;
+      keyword.e = schools.e;
+
+      let color = d3.rgb(colorRed, colorGreen, colorBlue);
+      let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center.x, 2) + Math.pow(keyword.positionY - center.y, 2));
+      keyword.color = color.brighter(lightness / 0.0080);
+    });
+
+    var bubbles = keywords;
+
+    _.forEach(facultyNodes, function(value, key) {
+      // Push the faculty nodes into the set of keywords (so that they can be mapped together)
+      bubbles.push({
+        keyword: key,
+        type: "focus",
+        positionX: value.x,
+        positionY: value.y,
+        total: 2000, // TODO To be calculated dynamically with a coefficient to scale.
+        color: colors[key]
+      });
+    });
+
+    console.log(bubbles);
+
     initSVG();
 
     /* Test Brush With Dummy Data */
@@ -256,8 +305,7 @@ firebase.database().ref('/keywords').orderByChild('total').startAt(5).once('valu
       { year: 2012, total: 300 },
       { year: 2013, total: 200 },
       { year: 2014, total: 100 },
-      { year: 2015, total: 400 },
-      { year: 2016, total: 500 }
+      { year: 2015, total: 400 }
     ];
 
     var formatAxis = d3.format('.0f');
