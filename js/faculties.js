@@ -305,7 +305,7 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       { year: 2012, total: 300 },
       { year: 2013, total: 200 },
       { year: 2014, total: 100 },
-      { year: 2015, total: 400 }
+      { year: 2015, total: 500 }
     ];
 
     var formatAxis = d3.format('.0f');
@@ -314,7 +314,7 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       width = $('#timeline').width() - margin.left - margin.right,
       height = 50;
 
-    var x = d3.scaleTime().range([0, width]),
+    var x = d3.scaleLinear().range([0, width]),
         y = d3.scaleLinear().range([height, 0]);
 
     var xAxis = d3.axisBottom(x).tickSize(0),
@@ -372,28 +372,30 @@ firebase.database().ref('/keywords').once('value', snapshot => {
           .call(brush.move, x.range());
 
     function brushed() {
-      var s = d3.event.selection || x.range();
-      x.domain(s.map(x.invert, x));
+
     }
 
     function snapBrush() {
-      // TODO: Work on snap
-      // if (!d3.event.sourceEvent) return; // Only transition after input.
-      // if (!d3.event.selection) return; // Ignore empty selections.
-      // var d0 = d3.event.selection.map(x.invert),
-      //     d1 = d0.map(d3.timeDay.round);
-      //
-      // if (d1[0] >= d1[1]) {
-      //   d1[0] = d3.timeDay.floor(d0[0]);
-      //   d1[1] = d3.timeDay.offset(d1[0]);
-      // }
-      //
-      // d3.select(this).transition().call(d3.event.target.move, d1.map(x));
+      // TODO: Reword on this?
+      if (!d3.event.sourceEvent) return; // Only transition after input.
+      if (!d3.event.selection) return; // Ignore empty selections.
+
+      var range = d3.event.selection.map(x.invert);
+      var x1 = Math.round(range[0]);
+      var x2 = Math.round(range[1]);
+
+      var selectionRange = d3.scaleLinear().range([x1, x2]);
+      selectionRange.domain([x1, x2]);
+
+      var selectedRange = range.map(selectionRange);
+      selectedRange = [Math.round(selectedRange[0]), Math.round(selectedRange[1])];
+      d3.select(".brush").transition().call(brush.move, selectedRange.map(x));
     }
 
+    // OnClick of play button
     var i = 0;
-    d3.select(".brush").transition().call(brush.move, [0, i])
-      .on("end", animate);
+    // d3.select(".brush").transition().call(brush.move, [0, i])
+    //   .on("end", animate);
 
     // function animate() {
     //   setTimeout(function () {
