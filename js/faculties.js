@@ -285,24 +285,12 @@ firebase.database().ref('/keywords').once('value', snapshot => {
           keyword.a = schools.a;
           keyword.d = schools.d;
           keyword.e = schools.e;
-        } else {
-          keyword.total = 0;
-          keyword.positionX = -1000;
-          keyword.positionY = -1000;
-          keyword.a = 0;
-          keyword.d = 0;
-          keyword.e = 0;
-          keyword.color = d3.rgb(33, 33, 33);
-        }
-
-        if (keyword.total != 0) {
           let color = d3.rgb(colorRed, colorGreen, colorBlue);
           let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center.x, 2) + Math.pow(keyword.positionY - center.y, 2));
           keyword.color = color.brighter(lightness / 0.0080);
+          bubbles = bubbles.concat(keyword);
         }
       });
-
-      bubbles = bubbles.concat(keywords);
     }
 
     initSVG();
@@ -431,16 +419,16 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       });
 
     var simulation = d3.forceSimulation()
-      .force("x", d3.forceX().strength(.5).x(bubble => {
+      .force("x", d3.forceX().strength(1.5).x(bubble => {
         return bubble.positionX;
       }))
-      .force("y", d3.forceY().strength(.5).y(bubble => {
+      .force("y", d3.forceY().strength(1.5).y(bubble => {
         return bubble.positionY;
       }))
-      .force("charge", d3.forceManyBody().strength(-5))
-      .force("collide", d3.forceCollide().radius(bubble => {
-        return size(bubble.total) + 1;
-      }).iterations(2));
+      .force("charge", d3.forceManyBody().strength(-1))
+      // .force("collide", d3.forceCollide().radius(bubble => {
+        // return size(bubble.total) + 1;
+      // }).iterations(2));
       // .force("center", d3.forceCenter(center.x, center.y));
 
     simulation
@@ -451,6 +439,7 @@ firebase.database().ref('/keywords').once('value', snapshot => {
     var text = g.selectAll(".keyword-text");
 
     function ticked() {
+      console.log("ticking");
       bubble.attr("cx", bubble => {
         return bubble.x;
       }).attr("cy", bubble => {
@@ -519,7 +508,7 @@ firebase.database().ref('/keywords').once('value', snapshot => {
           .style("fill", d => { return d.keyword == 'a' || d.keyword == 'd' || d.keyword == 'e' ? "#212121" : "#E0E0E0"; });
 
       simulation.nodes(bubbles);
-      simulation.restart();
+      simulation.alpha(1).restart();
     }
 
     svg.call(tip);
