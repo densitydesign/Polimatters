@@ -56,7 +56,7 @@
         <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the top 500 keywords of the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
     </div>
 
-    <div class="visualisation"></div>
+    <div class="visualisation" id="visualisation"></div>
 
     <div class="toggle_language" id="toggle_language">
       <p><a href="">IT</a></p>
@@ -74,6 +74,8 @@
     </div> -->
 
     <button class="fa fa-arrow-left" aria-hidden="true" id="back"></button>
+
+    <button class="explore_relators" id="explore_relators" onclick="exploreRelators()">Explore Relators</button>
 
     <div class="searchbar" id="searchbar">
       <input type="text" id="search_query" onkeyup="search()" placeholder="Search">

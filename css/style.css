@@ -217,6 +217,14 @@ ul {
   margin: 25px;
 }
 
+.explore_relators {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 10px;
+}
+
 .brushAxis line {
   stroke: #E0E0E0;
   shape-rendering: crispEdges;
