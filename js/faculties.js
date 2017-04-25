@@ -1,15 +1,10 @@
-let center = { x: window.innerWidth / 2, y: window.innerHeight / 2};
-let colors = {
-  "e": "#00FFCA",
-  "a": "#FF3054",
-  "d": "#EEFF14"
-};
+/*
+  Polimatters
+*/
 
-let faculties = [
-  "a",
-  "e",
-  "d"
-];
+let center = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+let colors = { e: "#00FFCA", a: "#FF3054", d: "#EEFF14" };
+let faculties = ["a", "e", "d"];
 
 let architecture = [
   "architettura",
@@ -87,14 +82,13 @@ let years = [
 ];
 
 let facultyNodes = {};
+let fetchedKeywords = [];
 let keywords = [];
 let radius = (window.innerWidth / 2) * .4;
 let size = null;
 let total = 0;
 
 var currentPage = 0;
-var limitter = 1;
-
 var minimumYear = 2008;
 var maximumYear = 2016;
 
@@ -102,20 +96,13 @@ var maximumYear = 2016;
 // 54325 keywords
 firebase.database().ref('/keywords').once('value', snapshot => {
   snapshot.forEach(keyword => {
-
     var year_node = { total: 0 };
 
     // Split by years
     years.forEach(year => {
       if (keyword.val()[year]) {
         var word = keyword.val()[year];
-        // var json_year = '{ "' + year + '" : { "a": 0, "d" : 0, "e" : 0, "total": 0 } }';
-        year_node[year] = {
-          a: 0,
-          d: 0,
-          e: 0,
-          total: 0
-        }
+        year_node[year] = { a: 0, d: 0, e: 0, total: 0 }
 
         architecture.forEach(course => {
           if (Object.keys(word).includes(course))
@@ -137,14 +124,17 @@ firebase.database().ref('/keywords').once('value', snapshot => {
         year_node[year].total = word.total;
         year_node.total += year_node[year].total;
 
-        if (year_node.total >= 10) {
+        if (year_node.total >= 5) {
           total += year_node.total;
-          keywords.push(year_node);
+          fetchedKeywords.push(year_node);
         }
       }
     });
   });
 }).then(v => {
+  var tip = d3.tip();
+  var svg, g;
+
   total = 5500;
 
   size = d3.scaleSqrt()
@@ -158,9 +148,6 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       y: center.y + radius * Math.sin(2 * Math.PI * (index / faculties.length))
     }
   });
-
-  var tip = d3.tip();
-  var svg, g;
 
   function initSVG() {
     svg = d3.select(".visualisation").append("svg")
@@ -230,55 +217,13 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       // TODO: add a transition for the text when it's clicked as well
   }
 
-  function showForceLayout() {
+  function showForceLayout(from, to) {
+    var bubbles = [];
+
+    d3.select('#timeline svg').remove();
+    d3.select('#forceLayout').remove();
+
     currentPage = 1;
-
-    keywords.forEach(keyword => {
-      let multiplier = 0;
-      let upX = 0;
-      let upY = 0;
-      let down = 0;
-      let colorRed = 0;
-      let colorGreen = 0;
-      let colorBlue = 0;
-      let schools = { a: 0, d: 0, e: 0 };
-      let totalOccurrence = 0;
-
-
-      // loop through the chosen years and find out the total and the ratio for the multiplier! :D
-      // TEST for all years
-      years.forEach(year => {
-        if (keyword[year]) {
-          totalOccurrence += keyword[year].total;
-          schools.a += keyword[year].a;
-          schools.d += keyword[year].d;
-          schools.e += keyword[year].e;
-        }
-      });
-
-      faculties.forEach(faculty => {
-       // Figure out what faculties a keyword belongs to
-       var multiplier = parseFloat(schools[faculty] / totalOccurrence);
-       upX += multiplier * facultyNodes[faculty].x;
-       upY += multiplier * facultyNodes[faculty].y;
-       colorRed += multiplier * d3.color(colors[faculty]).r;
-       colorGreen += multiplier * d3.color(colors[faculty]).g;
-       colorBlue += multiplier * d3.color(colors[faculty]).b;
-       down += multiplier;
-     });
-
-      keyword.positionX = upX / down;
-      keyword.positionY = upY / down;
-      keyword.a = schools.a;
-      keyword.d = schools.d;
-      keyword.e = schools.e;
-
-      let color = d3.rgb(colorRed, colorGreen, colorBlue);
-      let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center.x, 2) + Math.pow(keyword.positionY - center.y, 2));
-      keyword.color = color.brighter(lightness / 0.0080);
-    });
-
-    var bubbles = keywords;
 
     _.forEach(facultyNodes, function(value, key) {
       // Push the faculty nodes into the set of keywords (so that they can be mapped together)
@@ -292,9 +237,77 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       });
     });
 
-    console.log(bubbles);
+    function computeKeywords() {
+      bubbles = [];
+      from = "" + from + "-" + parseInt(from + 1);
+      let chosenYears = years.slice(years.indexOf(from), years.indexOf(from) + to - parseInt(from.substring(0, 4)));
+
+      // Reset the keywords
+      keywords = fetchedKeywords;
+
+      keywords.forEach(keyword => {
+        let multiplier = 0;
+        let upX = 0;
+        let upY = 0;
+        let down = 0;
+        let colorRed = 0;
+        let colorGreen = 0;
+        let colorBlue = 0;
+        let schools = { a: 0, d: 0, e: 0 };
+        let totalOccurrence = 0;
+
+        // loop through the chosen years and find out the total and the ratio for the multiplier! :D
+        // TEST for all years
+        chosenYears.forEach(year => {
+          if (keyword[year]) {
+            totalOccurrence += keyword[year].total;
+            schools.a += keyword[year].a;
+            schools.d += keyword[year].d;
+            schools.e += keyword[year].e;
+          }
+        });
+
+        faculties.forEach(faculty => {
+          // Figure out what faculties a keyword belongs to
+          var multiplier = parseFloat(schools[faculty] / totalOccurrence);
+          upX += multiplier * facultyNodes[faculty].x;
+          upY += multiplier * facultyNodes[faculty].y;
+          colorRed += multiplier * d3.color(colors[faculty]).r;
+          colorGreen += multiplier * d3.color(colors[faculty]).g;
+          colorBlue += multiplier * d3.color(colors[faculty]).b;
+          down += multiplier;
+       });
+
+        if (totalOccurrence > 0) {
+          keyword.total = totalOccurrence; // Come on :/
+          keyword.positionX = upX / down;
+          keyword.positionY = upY / down;
+          keyword.a = schools.a;
+          keyword.d = schools.d;
+          keyword.e = schools.e;
+        } else {
+          keyword.total = 0;
+          keyword.positionX = -1000;
+          keyword.positionY = -1000;
+          keyword.a = 0;
+          keyword.d = 0;
+          keyword.e = 0;
+          keyword.color = d3.rgb(33, 33, 33);
+        }
+
+        if (keyword.total != 0) {
+          let color = d3.rgb(colorRed, colorGreen, colorBlue);
+          let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center.x, 2) + Math.pow(keyword.positionY - center.y, 2));
+          keyword.color = color.brighter(lightness / 0.0080);
+        }
+      });
+
+      bubbles = bubbles.concat(keywords);
+    }
 
     initSVG();
+
+    d3.selectAll(".visualisation svg").attr("id", "forceLayout");
 
     /* Test Brush With Dummy Data */
     var data = [
@@ -371,26 +384,11 @@ firebase.database().ref('/keywords').once('value', snapshot => {
           .call(brush)
           .call(brush.move, x.range());
 
-    function brushed() {
+    var selectionRange = 0;
+    var x1 = 0, x2 = 0;
+    var range = 0;
 
-    }
 
-    function snapBrush() {
-      // TODO: Reword on this?
-      if (!d3.event.sourceEvent) return; // Only transition after input.
-      if (!d3.event.selection) return; // Ignore empty selections.
-
-      var range = d3.event.selection.map(x.invert);
-      var x1 = Math.round(range[0]);
-      var x2 = Math.round(range[1]);
-
-      var selectionRange = d3.scaleLinear().range([x1, x2]);
-      selectionRange.domain([x1, x2]);
-
-      var selectedRange = range.map(selectionRange);
-      selectedRange = [Math.round(selectedRange[0]), Math.round(selectedRange[1])];
-      d3.select(".brush").transition().call(brush.move, selectedRange.map(x));
-    }
 
     // OnClick of play button
     var i = 0;
@@ -433,15 +431,15 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       });
 
     var simulation = d3.forceSimulation()
-      .force("x", d3.forceX().strength(.1).x(bubble => {
+      .force("x", d3.forceX().strength(.5).x(bubble => {
         return bubble.positionX;
       }))
-      .force("y", d3.forceY().strength(.1).y(bubble => {
+      .force("y", d3.forceY().strength(.5).y(bubble => {
         return bubble.positionY;
       }))
-      .force("charge", d3.forceManyBody().strength(1))
+      .force("charge", d3.forceManyBody().strength(-5))
       .force("collide", d3.forceCollide().radius(bubble => {
-        return size(bubble.total) + .75;
+        return size(bubble.total) + 1;
       }).iterations(2));
       // .force("center", d3.forceCenter(center.x, center.y));
 
@@ -449,42 +447,8 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       .nodes(bubbles)
       .on("tick", ticked);
 
-    var bubble = g.selectAll(".keyword")
-      .data(bubbles)
-      .enter()
-      .append("circle")
-        .attr("class", "keyword")
-        .attr("r", bubble => {
-          return size(bubble.total);
-        })
-        .style("fill", bubble => {
-          return bubble.color;
-        })
-        .on('click', bubble => {
-          navigateTo(2, bubble);
-        })
-        .on('mouseenter', tip.show)
-        .on('mouseleave', tip.hide);
-
-    // TODO: Labels for the bubbles
-    var text = g.selectAll(".keyword-text")
-      .data(bubbles)
-      .enter()
-      .append("text")
-      .attr("class", "keyword-text")
-        .attr("pointer-events", "none")
-        .attr("text-anchor", d => {
-          return faculties.includes(d.keyword) ? "middle" : "left";
-        })
-        .attr("font-family", "Poiret One")
-        .attr("font-size", 15)
-        .text(d => {
-          if (d.keyword == 'a') return "Architecture";
-          else if (d.keyword == 'd') return "Design";
-          else if (d.keyword == 'e') return "Engineering";
-          else if (d.total > 40) return d.keyword;
-        })
-        .style("fill", d => { return d.keyword == 'a' || d.keyword == 'd' || d.keyword == 'e' ? "#212121" : "#E0E0E0"; });
+    var bubble = g.selectAll(".keyword");
+    var text = g.selectAll(".keyword-text");
 
     function ticked() {
       bubble.attr("cx", bubble => {
@@ -500,6 +464,64 @@ firebase.database().ref('/keywords').once('value', snapshot => {
       });
     }
 
+    function restart() {
+      console.log("Debug: " + from + "-" + to)
+      computeKeywords();
+
+      bubble = bubble.data(bubbles, function(d) { return d.id; });
+
+      bubble.exit()
+        .remove();
+
+      bubble = bubble
+        .enter()
+        .append("circle")
+          .attr("class", "keyword")
+          .attr("r", bubble => {
+            // DEBUG FOR MILAN KEYWORD
+            if (bubble.keyword == "Milan") {
+              console.log(bubble.total);
+            }
+            return size(bubble.total);
+          })
+          .style("fill", bubble => {
+            return bubble.color;
+          })
+          .on('click', bubble => {
+            navigateTo(2, bubble);
+          })
+          .on('mouseenter', tip.show)
+          .on('mouseleave', tip.hide);
+
+
+      // TODO: Labels for the bubbles
+      text = text.data(text, function(d) { return d.id;});
+
+      text.exit()
+        .remove();
+
+      text = text
+        .enter()
+        .append("text")
+        .attr("class", "keyword-text")
+          .attr("pointer-events", "none")
+          .attr("text-anchor", d => {
+            return faculties.includes(d.keyword) ? "middle" : "left";
+          })
+          .attr("font-family", "Poiret One")
+          .attr("font-size", 15)
+          .text(d => {
+            if (d.keyword == 'a') return "Architecture";
+            else if (d.keyword == 'd') return "Design";
+            else if (d.keyword == 'e') return "Engineering";
+            else if (d.total > 40) return d.keyword;
+          })
+          .style("fill", d => { return d.keyword == 'a' || d.keyword == 'd' || d.keyword == 'e' ? "#212121" : "#E0E0E0"; });
+
+      simulation.nodes(bubbles);
+      simulation.restart();
+    }
+
     svg.call(tip);
 
     // Tincy rotation
@@ -508,6 +530,37 @@ firebase.database().ref('/keywords').once('value', snapshot => {
     //   svg.style("transform", "rotate(" + speed + "deg)");
     //   speed -= .0125;
     // });
+
+    function brushed() {
+      range = d3.event.selection.map(x.invert);
+      x1 = Math.round(range[0]);
+      x2 = Math.round(range[1]);
+
+      if (x1 < minimumYear) x1 = minimumYear;
+      if (x2 > maximumYear) x2 = maximumYear;
+
+      from  = x1;
+      to = x2;
+
+      selectionRange = d3.scaleLinear().range([x1, x2]);
+      selectionRange.domain([x1, x2]);
+    }
+
+    function snapBrush() {
+      // TODO: Reword on this?
+      if (!d3.event.sourceEvent) return; // Only transition after input.
+      if (!d3.event.selection) return; // Ignore empty selections.
+      if (from == minimumYear && to == maximumYear) return;
+
+      console.log("snapped");
+      restart();
+
+      var selectedRange = range.map(selectionRange);
+      selectedRange = [Math.round(selectedRange[0]), Math.round(selectedRange[1])];
+      d3.select(".brush").transition().call(brush.move, selectedRange.map(x));
+    }
+
+    restart();
   }
 
   function exploreKeyword(bubble) {
@@ -872,6 +925,8 @@ firebase.database().ref('/keywords').once('value', snapshot => {
   }
 
   function navigateTo(navigate, bubble) {
+    keywords = null;
+
     d3.select('#timeline svg').remove();
     switch (navigate) {
       case 0:
@@ -899,7 +954,7 @@ firebase.database().ref('/keywords').once('value', snapshot => {
           });
           d3.select('#frequency_bar').remove();
           d3.select('#tooltip').remove();
-          showForceLayout();
+          showForceLayout(minimumYear, maximumYear);
         break;
       case 2:
         currentPage = 2;
