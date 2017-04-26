@@ -386,39 +386,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     var x1 = 0, x2 = 0;
     var range = 0;
 
-    $('#play_stop').click(function(d) {
-      animate();
-    });
-
-    // OnClick of play button
-    var i = 0;
-    // d3.select(".brush").transition().call(brush.move, [0, i])
-    //   .on("end", animate);
-
-    function animate() {
-      setTimeout(function () {
-        if (i < width) {
-          // TODO: disable brush
-          d3.select(".brush").transition().call(brush.move, [0, i += 1]);
-          animate();
-        } else {
-          // TODO: enable brush
-
-        }
-      }, 25);
-    }
-
-    function animate() {
-      setTimeout(function () {
-        if (i < width) {
-          d3.select(".brush").transition().call(brush.move, [0, i += width / 8]);
-          animate();
-        }
-      }, 2000);
-    }
-
-    // End test
-
     tip
       .attr('class', 'd3-tip')
       .attr('id', 'tooltip')
@@ -528,6 +495,45 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     //   svg.style("transform", "rotate(" + speed + "deg)");
     //   speed -= .0125;
     // });
+
+    var paused = false;
+
+    $('#play').click(function(d) {
+      brushed = false;
+      paused = false;
+      $('#pause').show();
+      $('#play').hide();
+      animate();
+    });
+
+    $('#pause').click(function(d) {
+      paused = true;
+      $('#play').show();
+      $('#pause').hide();
+    });
+
+    var toYear = 2009;
+    var i = 0;
+
+    function animate() {
+      setTimeout(function () {
+        if (toYear <= maximumYear && !paused) {
+          d3.select(".brush").transition().call(brush.move, [0, i += width / 8]);
+          from = 2008;
+          to = toYear++;
+          restart();
+          animate();
+        }
+      }, 500);
+
+      if (toYear > maximumYear) {
+        paused = true;
+        $('#pause').hide();
+        $('#play').show();
+        i = 0;
+        toYear = 2009;
+      }
+    }
 
     function brushed() {
       range = d3.event.selection.map(x.invert);
@@ -797,6 +803,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
             return b.dy - a.dy;
           });
 
+        _relators = [];
+
         // add the link titles
         link.append("title")
           .text(d => {
@@ -928,7 +936,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     _relators.forEach(function(relator, index) {
       graph.nodes.push({
         name: relator.name,
-        id: size(relator.size) + 15
+        id: size(relator.size) + 5
       });
 
       graph.links.push({
@@ -947,14 +955,12 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     d3.selectAll("body svg").attr("id", "explore_keyword");
 
     var simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().distance(400))
-      .force("collide", d3.forceCollide().radius(node => {
-        return 50;
-      }).iterations(1))
-      .force("charge", d3.forceManyBody().strength(-5))
+      .force("link", d3.forceLink().distance(window.innerHeight * 0.2))
+      // .force("collide", d3.forceCollide().radius((3.14 * 400 * 2) / graph.nodes.length).iterations(1))
+      .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("x", d3.forceX())
-      .force("y", d3.forceY())
+      // .force("x", d3.forceX())
+      // .force("y", d3.forceY())
 
     var link = svg.append("g")
       .attr("class", "links")
@@ -962,7 +968,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .data(graph.links)
       .enter()
       .append("line")
-      .attr("stroke", "black")
+      .attr("stroke", "#E0E0E0")
 
     var node = svg.append("g")
       .attr("class", "nodes")
@@ -1031,6 +1037,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     keywords = null;
     d3.select('#forceLayout').remove();
     d3.select('#timeline svg').remove();
+    $('#play').hide();
+    $('#pause').hide();
     $('#explore_relators').hide();
     switch (navigate) {
       case 0:
@@ -1047,6 +1055,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         $('#searchbar').show();
         $(".visualisation").css({ position: 'absolute' });
         $('#alluvial_legend').hide();
+        $('#play').show();
+        $('#pause').hide();
 
         // Make the Polimi ellipse dissappear
         d3.select("ellipse").transition()

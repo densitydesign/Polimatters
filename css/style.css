@@ -217,8 +217,32 @@ ul {
   margin: 25px;
 }
 
-.play_stop {
-  
+#play {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #E0E0E0;
+  font-size: 25px;
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  right: 10%;
+  display: none;
+  margin-bottom: 65px;
+}
+
+#pause {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #E0E0E0;
+  font-size: 25px;
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  right: 10%;
+  display: none;
+  margin-bottom: 65px;
 }
 
 .explore_relators {
