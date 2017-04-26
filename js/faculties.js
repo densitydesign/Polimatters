@@ -296,16 +296,17 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           keyword.color = color.brighter(lightness / 0.0080);
 
           bubbles = bubbles.concat(keyword);
-          // bubbles = bubbles.concat(departments);
         }
       });
+
+      bubbles = bubbles.concat(departments);
     }
 
     initSVG();
 
     d3.selectAll(".visualisation svg").attr("id", "forceLayout");
 
-    /* Test Brush With Dummy Data */
+    /* TODO: Compute the total for each year */
     var data = [
       { year: 2008, total: 100 },
       { year: 2009, total: 200 },
@@ -314,7 +315,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       { year: 2012, total: 300 },
       { year: 2013, total: 200 },
       { year: 2014, total: 100 },
-      { year: 2015, total: 500 }
+      { year: 2015, total: 500 },
+      { year: 2016, total: 500 }
     ];
 
     var formatAxis = d3.format('.0f');
