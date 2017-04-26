@@ -88,10 +88,12 @@ let radius = (window.innerWidth / 2) * .4;
 let size = null;
 let total = 0;
 
+var _relators = [];
 var currentPage = 0;
 var minimumYear = 2008;
 var maximumYear = 2016;
 var bubble, text;
+var _exploringKeyword;
 var exploreRelators = function() {}
 
 // Fetch data
@@ -126,7 +128,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         year_node[year].total = word.total;
         year_node.total += year_node[year].total;
 
-        if (year_node.total >= 10) {
+        if (year_node.total >= 25) {
           total += year_node.total;
           fetchedKeywords.push(year_node);
         }
@@ -142,14 +144,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
   size = d3.scaleSqrt()
     .domain([0, total])
     .range([0, 96]);
-
-  // Faculties circles
-  faculties.forEach(function(faculty, index) {
-    facultyNodes[faculty] = {
-      x: center.x + radius * Math.cos(2 * Math.PI * (index / faculties.length)),
-      y: center.y + radius * Math.sin(2 * Math.PI * (index / faculties.length))
-    }
-  });
 
   function initSVG() {
     svg = d3.select(".visualisation").append("svg")
@@ -228,37 +222,31 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     currentPage = 1;
 
     var departments = [];
+    faculties.forEach(function(faculty, index) {
+      facultyNodes[faculty] = {
+        x: center.x + radius * Math.cos(2 * Math.PI * (index / faculties.length)),
+        y: center.y + radius * Math.sin(2 * Math.PI * (index / faculties.length))
+      }
+    });
 
-    // _.forEach(facultyNodes, function(value, key) {
-    //   // Push the faculty nodes into the set of keywords (so that they can be mapped together)
-    //   departments.push({
-    //     keyword: key,
-    //     type: "focus",
-    //     positionX: value.x,
-    //     positionY: value.y,
-    //     total: 2000, // TODO To be calculated dynamically with a coefficient to scale.
-    //     color: colors[key]
-    //   });
-    // });
+    // Faculties circles
+    _.forEach(facultyNodes, function(value, key) {
+      // Push the faculty nodes into the set of keywords (so that they can be mapped together)
+      departments.push({
+        keyword: key,
+        type: "focus",
+        positionX: value.x,
+        positionY: value.y,
+        total: 5000, // TODO To be calculated dynamically with a coefficient to scale.
+        color: colors[key]
+      });
+    });
 
     function computeKeywords() {
       from = "" + from + "-" + parseInt(from + 1);
       let chosenYears = years.slice(years.indexOf(from), years.indexOf(from) + to - parseInt(from.substring(0, 4)));
 
-      departments = [];
-      _.forEach(facultyNodes, function(value, key) {
-        // Push the faculty nodes into the set of keywords (so that they can be mapped together)
-        departments.push({
-          keyword: key,
-          type: "focus",
-          positionX: value.x,
-          positionY: value.y,
-          total: 2000, // TODO To be calculated dynamically with a coefficient to scale.
-          color: colors[key]
-        });
-      });
-
-      bubbles = departments;
+      bubbles = [];
 
       // Reset the keywords
       keywords = fetchedKeywords;
@@ -308,6 +296,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           keyword.color = color.brighter(lightness / 0.0080);
 
           bubbles = bubbles.concat(keyword);
+          // bubbles = bubbles.concat(departments);
         }
       });
     }
@@ -395,21 +384,27 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     var x1 = 0, x2 = 0;
     var range = 0;
 
-
+    $('#play_stop').click(function(d) {
+      animate();
+    });
 
     // OnClick of play button
     var i = 0;
     // d3.select(".brush").transition().call(brush.move, [0, i])
     //   .on("end", animate);
 
-    // function animate() {
-    //   setTimeout(function () {
-    //     if (i < width) {
-    //       d3.select(".brush").transition().call(brush.move, [0, i += 1]);
-    //       animate();
-    //     }
-    //   }, 25);
-    // }
+    function animate() {
+      setTimeout(function () {
+        if (i < width) {
+          // TODO: disable brush
+          d3.select(".brush").transition().call(brush.move, [0, i += 1]);
+          animate();
+        } else {
+          // TODO: enable brush
+
+        }
+      }, 25);
+    }
 
     function animate() {
       setTimeout(function () {
@@ -495,9 +490,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .on('mouseenter', tip.show)
           .on('mouseleave', tip.hide);
 
-
       // TODO: Labels for the bubbles
-      text = text.data(text, function(d) { return d.id;});
+      text = text.data(bubbles, function(d) { return d.id;});
 
       text.exit()
         .remove();
@@ -516,7 +510,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
             if (d.keyword == 'a') return "Architecture";
             else if (d.keyword == 'd') return "Design";
             else if (d.keyword == 'e') return "Engineering";
-            else if (d.total > 20) console.log(d.keyword); return d.keyword;
+            else if (d.total > 100) return d.keyword; // TODO: Make dynamic to show only the top 10 or so labels
           })
           .style("fill", d => { return d.keyword == 'a' || d.keyword == 'd' || d.keyword == 'e' ? "#212121" : "#E0E0E0"; });
 
@@ -664,16 +658,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           });
         }
 
-        // Push the keyword
-        // nodes.push({
-        //   "node": 0,
-        //   "name": keyword
-        // });
-
-        // Links from keyword
-        // addLink(0, 1);
-        // addLink(0, 2)
-
         var graph = {};
         graph.nodes = nodes;
         graph.links = links;
@@ -708,6 +692,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
+        d3.selectAll(".visualisation svg").attr("id", "alluvial_chart");
+
         // TODO: Create a bar on top to show the occurrence of the selected keyword in the schools
         var bar = d3.select(".frequency_bar").append("svg")
           .attr("id", "frequency_bar")
@@ -717,14 +703,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         var architecturePercent = (bubble.a/bubble.total) * window.innerWidth;
         var designPercent = (bubble.d/bubble.total) * window.innerWidth;
         var engineeringPercent = (bubble.e/bubble.total) * window.innerWidth;
-
-        // pallet - a 4 d 0 e 2
-        if (bubble.keyword == 'control') {
-          console.log(bubble)
-          console.log(architecturePercent / window.innerWidth)
-          console.log(designPercent / window.innerWidth)
-          console.log(engineeringPercent / window.innerWidth)
-        }
 
         var bars = [
           {x: 0, width: architecturePercent, color: colors.a, label: "Architecture"},
@@ -820,6 +798,15 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         // add the link titles
         link.append("title")
           .text(d => {
+            // Testing relator exploration
+            if (uniqueRelators.includes(d.target.name)) {
+              _relators.push({
+                name: d.target.name,
+                size: d.value
+              });
+            }
+            // End Test
+
             return d.source.name + " → " +
               d.target.name + "\n" + format(d.value);
           });
@@ -928,69 +915,25 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
   }
 
   function showRelators() {
-    var graph = {
-      "nodes": [
-      {
-        "id": 0
-      },
-      {
-        "id": 1
-      },
-      {
-        "id": 2
-      },
-      {
-        "id": 3
-      },
-      {
-        "id": 4
-      },
-      {
-        "id": 5
-      },
-      {
-        "id": 6
-      },
-      {
-        "id": 7
-      },
-      {
-        "id": 8
-      }],
-      "links": [
-      {
-        "source": 0,
-        "target": 1
-      },
-      {
-        "source": 0,
-        "target": 2
-      },
-      {
-        "source": 0,
-        "target": 3
-      },
-      {
-        "source": 0,
-        "target": 4
-      },
-      {
-        "source": 0,
-        "target": 5
-      },
-      {
-        "source": 0,
-        "target": 6
-      },
-      {
-        "source": 0,
-        "target": 7
-      },
-      {
-        "source": 0,
-        "target": 8
-      }]
-    }
+    var graph = { nodes: [], links: []};
+
+    // Push the middle node
+    graph.nodes.push({
+      name: "keyword",
+      id: 25
+    });
+
+    _relators.forEach(function(relator, index) {
+      graph.nodes.push({
+        name: relator.name,
+        id: size(relator.size) + 15
+      });
+
+      graph.links.push({
+        source: 0,
+        target: index + 1
+      });
+    });
 
     var width = window.innerWidth,
       height = window.innerHeight;
@@ -999,10 +942,12 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .attr("width", width)
       .attr("height", height);
 
+    d3.selectAll("body svg").attr("id", "explore_keyword");
+
     var simulation = d3.forceSimulation()
       .force("link", d3.forceLink().distance(400))
       .force("collide", d3.forceCollide().radius(node => {
-        return 100;
+        return 50;
       }).iterations(1))
       .force("charge", d3.forceManyBody().strength(-5))
       .force("center", d3.forceCenter(width / 2, height / 2))
@@ -1022,7 +967,10 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .selectAll("circle")
       .data(graph.nodes)
       .enter().append("circle")
-      .attr("r", 40)
+      .attr("r", node => {
+        return node.id;
+      })
+      .attr("fill", "#1DE9B6")
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
@@ -1118,6 +1066,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         $('#alluvial_legend').show();
         $('#explore_relators').show();
 
+        _exploringKeyword = bubble;
+
         // TODO: Go through this
         if (!faculties.includes(bubble.keyword)) {
           $("#back").show();
@@ -1126,10 +1076,11 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         }
         break;
       case 3:
+        currentPage = 3;
         d3.select('#frequency_bar').remove();
         d3.select('#alluvial_legend').remove();
+        d3.select('#alluvial_chart').remove();
         $(".visualisation").css({ position: 'absolute' });
-        d3.select('#visualisation').remove();
         showRelators();
         break;
     }
@@ -1141,6 +1092,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       navigateTo(0);
     } else if (currentPage == 2) {
       navigateTo(1);
+    } else if (currentPage == 3) {
+      navigateTo(2, _exploringKeyword); // TODO: Add dynamic value
     }
   });
 });
