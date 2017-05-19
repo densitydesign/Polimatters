@@ -5,6 +5,8 @@
 let center = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 let colors = { e: "#00FFCA", a: "#FF3054", d: "#EEFF14" };
 let faculties = ["a", "e", "d"];
+var width = window.innerWidth,
+  height = window.innerHeight;
 
 let architecture = [
   "architettura",
@@ -128,7 +130,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         year_node[year].total = word.total;
         year_node.total += year_node[year].total;
 
-        if (year_node.total >= 25) {
+        if (year_node.total >= 40) {
           total += year_node.total;
           fetchedKeywords.push(year_node);
         }
@@ -136,6 +138,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     });
   });
 }).then(v => {
+  console.log("ready!");
+
   var tip = d3.tip();
   var svg, g;
 
@@ -147,7 +151,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
   function initSVG() {
     svg = d3.select(".visualisation").append("svg")
-      .attr("width", window.innerWidth)
+      .attr("width", window.outerWidth)
       .attr("height", window.innerHeight)
       .call(d3.zoom()
         .scaleExtent([1 / 2, 4])
@@ -200,13 +204,13 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     svg.append("text")
       .attr("text-anchor", "middle")
       .attr("pointer-events", "none")
-      .attr("dx", d => { return center.x; })
-      .attr("dy", d => { return center.y + 9; }) // + fonts size / 2? TODO
+      .attr("dx", text => { return center.x; })
+      .attr("dy", text => { return center.y + 9; }) // + fonts size / 2? TODO
       .attr("opacity", 0)
       .attr("font-family", "Poiret One")
       .attr("font-size", 18)
-      .text(d => { return "Politecnico di Milano"; })
-      .style("fill", d => { return "#E0E0E0"; })
+      .text(text => { return "Politecnico di Milano"; })
+      .style("fill", text => { return "#E0E0E0"; })
       .transition()
         .attr("opacity", 1);
 
@@ -242,9 +246,30 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       });
     });
 
+    /* TODO: Compute the total for each year */
+    var data = [
+      { year: 2008, total: 0 },
+      { year: 2009, total: 0 },
+      { year: 2010, total: 0 },
+      { year: 2011, total: 0 },
+      { year: 2012, total: 0 },
+      { year: 2013, total: 0 },
+      { year: 2014, total: 0 },
+      { year: 2015, total: 0 }
+    ];
+
+    data.forEach(object => {
+      var year = object.year + "-" + parseInt(++object.year);
+
+      fetchedKeywords.forEach(keyword => {
+        if (keyword[year]) object.total += keyword[year].total;
+      });
+    });
+
     function computeKeywords() {
-      from = "" + from + "-" + parseInt(from + 1);
-      let chosenYears = years.slice(years.indexOf(from), years.indexOf(from) + to - parseInt(from.substring(0, 4)));
+      let chosenYears = years.slice(years.indexOf(from + "-" + parseInt(from + 1)), years.indexOf(from + "-" + parseInt(from + 1)) + to - parseInt(from));
+
+      var occurrencesPerYear = [];
 
       bubbles = [];
 
@@ -306,19 +331,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
     d3.selectAll(".visualisation svg").attr("id", "forceLayout");
 
-    /* TODO: Compute the total for each year */
-    var data = [
-      { year: 2008, total: 100 },
-      { year: 2009, total: 200 },
-      { year: 2010, total: 400 },
-      { year: 2011, total: 200 },
-      { year: 2012, total: 300 },
-      { year: 2013, total: 200 },
-      { year: 2014, total: 100 },
-      { year: 2015, total: 500 },
-      { year: 2016, total: 500 }
-    ];
-
     var formatAxis = d3.format('.0f');
 
     var margin = { top: 25, right: 25, bottom: 30, left: 25 },
@@ -335,8 +347,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
     var brush = d3.brushX()
         .extent([[0, 0], [width, height]])
-        .on("end", snapBrush)
         .on("brush", brushed)
+        .on("end", snapBrush)
 
     // TODO: Animate the brush
 
@@ -350,7 +362,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
     // var xMin = d3.min(data, function(d) { return d.year; });
     var xMin = 2008;
-    var yMax = Math.max(20, d3.max(data, function(d) { return d.total; }));
+    var yMax = Math.max(20, d3.max(data, d => { return d.total; }));
 
     x.domain([xMin, 2016]);
     y.domain([0, yMax]);
@@ -364,13 +376,17 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
        messages.attr("clip-path", "url(#clip)");
        messages.selectAll("message")
           .data(data)
-          .enter().append("circle")
+          .enter().append("rect")
           .attr('class', 'messageContext')
           .attr('fill', "#1DE9B6")
-          .attr("r", 5)
           .style("opacity", 1)
-          .attr("cx", d => { return x(d.year); })
-          .attr("cy", d => { return y(d.total); })
+          // .attr("r", 5)
+          // .attr("cx", d => { return x(d.year); })
+          // .attr("cy", d => { return y(d.total); })
+          .attr("x", d => { return x(d.year); })
+          .attr("y", d => { return y(d.total); })
+          .attr("width", width / 8)
+          .attr("height", d => { return 50 - y(d.total); })
 
     context.append("g")
           .attr("class", "brushAxis")
@@ -401,44 +417,38 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         return "<strong style='color: #E0E0E0;'>Word:</strong> <span style='color:red'>" + bubble.keyword + "</span> <br> <strong style='color: #E0E0E0;'>Architecture:</strong> <span style='color:red'>" + bubble.a + "</span> <br> <strong style='color: #E0E0E0;'>Design:</strong> <span style='color:red'>" + bubble.d + "</span> <br> <strong style='color: #E0E0E0;'>Engineering:</strong> <span style='color:red'>" + bubble.e + "</span>";
       });
 
-    var simulation = d3.forceSimulation()
+    var simulation;
+
+    simulation = d3.forceSimulation()
       .force("x", d3.forceX().strength(.1).x(bubble => {
-        return bubble.positionX;
+       return bubble.positionX;
       }))
       .force("y", d3.forceY().strength(.1).y(bubble => {
-        return bubble.positionY;
+       return bubble.positionY;
       }))
       .force("charge", d3.forceManyBody().strength(-1))
       .force("collide", d3.forceCollide().radius(bubble => {
-        return size(bubble.total) + .5;
-      }).iterations(1)); // Make as efficient as possible
-      // .force("center", d3.forceCenter(center.x, center.y));
-
-    simulation
-      .nodes(bubbles)
-      .on("tick", ticked);
-
-    bubble = g.selectAll(".keyword");
-    text = g.selectAll(".keyword-text");
-
-    function ticked() {
-      bubble.attr("cx", bubble => {
-        return bubble.x;
-      }).attr("cy", bubble => {
-        return bubble.y;
-      });
-      text.attr("x", text => {
-        if (faculties.includes(text.keyword)) return text.x;
-        return text.x + size(text.total) + 5;
-      }).attr("y", text => {
-        return text.y + 6;
-      });
-    }
+       return size(bubble.total) + .4;
+      }).iterations(1));
+    // Make as efficient as possible
+    // .force("center", d3.forceCenter(center.x, center.y));
 
     function restart() {
+      if (simulation) {
+        simulation.stop();
+        console.log("stopped")
+      }
+      bubbles = [];
       computeKeywords();
 
-      bubble = bubble.data(bubbles, function(d) { return d.id; });
+      var lineScale = d3.scaleLinear()
+        .domain([0, 250 / 2])
+        .range([0, 5]);
+
+      bubble = g.selectAll(".keyword");
+      text = g.selectAll(".keyword-text");
+
+      bubble = bubble.data(bubbles, d => { return d.id; });
 
       bubble.exit()
         .remove();
@@ -456,11 +466,66 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .on('click', bubble => {
             navigateTo(2, bubble);
           })
-          .on('mouseenter', tip.show)
-          .on('mouseleave', tip.hide);
+          .on('mouseover', mouseEnter)
+          .on('mouseleave', mouseLeave);
+
+      function ticked() {
+        bubble.attr("cx", bubble => {
+          return bubble.x;
+        }).attr("cy", bubble => {
+          return bubble.y;
+        });
+        text.attr("x", text => {
+          if (faculties.includes(text.keyword)) return text.x;
+          return text.x + size(text.total) + 5;
+        }).attr("y", text => {
+          return text.y + 6;
+        });
+      }
+
+      function mouseEnter(bubble) {
+        tip.show(bubble);
+        d3.selectAll("line").remove();
+
+        if (!bubble.type) {
+          faculties.forEach(faculty => {
+            g.append("line")
+              .attr("x1", d3.select(this).attr("cx"))
+              // .attr("x1", bubble.positionX)
+              .attr("x2", facultyNodes[faculty].x)
+              .attr("y1", d3.select(this).attr("cy"))
+              // .attr("y1", bubble.positionY)
+              .attr("y2", facultyNodes[faculty].y)
+              .style("stroke", "#E0E0E0")
+              .style("stroke-width", function(d) {
+                return lineScale(bubble[faculty]);
+              });
+           })
+
+          // TODO: Reduce the opacity of all the nodes except the selected node and the department nodes
+          d3.selectAll(".keyword")
+            .style("opacity", 0.2);
+          d3.selectAll(".keyword-text")
+            .style("opacity", 0);
+
+          d3.select(this).style("opacity", 1);
+        }
+      }
+
+      function mouseLeave(bubble) {
+        tip.hide(bubble);
+        d3.selectAll("line").remove();
+        d3.selectAll(".keyword")
+          .style("opacity", 1);
+
+        bubbles.forEach(b => {
+          d3.selectAll(".keyword-text")
+            .style("opacity", d => { return d.total > 100 ? 1 : 0; });
+        });
+      }
 
       // TODO: Labels for the bubbles
-      text = text.data(bubbles, function(d) { return d.id;});
+      text = text.data(bubbles, bubble => { return bubble.id; });
 
       text.exit()
         .remove();
@@ -479,12 +544,15 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
             if (d.keyword == 'a') return "Architecture";
             else if (d.keyword == 'd') return "Design";
             else if (d.keyword == 'e') return "Engineering";
-            else if (d.total > 100) return d.keyword; // TODO: Make dynamic to show only the top 10 or so labels
+            else return d.keyword; // TODO: Make dynamic to show only the top 10 or so labels
           })
-          .style("fill", d => { return d.keyword == 'a' || d.keyword == 'd' || d.keyword == 'e' ? "#212121" : "#E0E0E0"; });
+          .style("fill", d => { return d.keyword == 'a' || d.keyword == 'd' || d.keyword == 'e' ? "#212121" : "#E0E0E0"; })
+          .style("opacity", d => { return d.total > 100 ? 1 : 0; });
 
-      simulation.nodes(bubbles);
-      simulation.alpha(1).restart();
+      if (simulation) {
+        simulation.nodes(bubbles).on("tick", ticked);
+        simulation.alpha(1).restart();
+      }
     }
 
     svg.call(tip);
@@ -514,6 +582,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
     var toYear = 2009;
     var i = 0;
+    var delay = 0;
 
     function animate() {
       setTimeout(function () {
@@ -522,9 +591,10 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           from = 2008;
           to = toYear++;
           restart();
+          delay = 2500;
           animate();
         }
-      }, 500);
+      }, delay);
 
       if (toYear > maximumYear) {
         paused = true;
@@ -536,30 +606,50 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     }
 
     function brushed() {
-      range = d3.event.selection.map(x.invert);
-      x1 = Math.round(range[0]);
-      x2 = Math.round(range[1]);
+      if (!d3.event.sourceEvent) return; // Only transition after input.
+      if (!d3.event.selection) return; // Ignore empty selections.
 
-      if (x1 < minimumYear) x1 = minimumYear;
-      if (x2 > maximumYear) x2 = maximumYear;
 
-      from  = x1;
-      to = x2;
+      if (from == 0 && to == 0) {
+        from = x1 = minimumYear;
+        to = x2 = maximumYear;
+      } else {
+        range = d3.event.selection.map(x.invert);
+
+        if (Math.round(range[0]) - range[0] < 0.5 && Math.round(range[1]) - range[1] < 0.5 && Math.round(range[0]) - range[0] > 0 && Math.round(range[1]) - range[1] > 0
+          && Math.round(range[1]) - Math.round(range[0]) < 2) {
+          x1 = Math.round(range[0]) - 1;
+          x2 = Math.round(range[1]) - 1;
+        } else {
+          x1 = Math.round(range[0]);
+          x2 = Math.round(range[1]);
+        }
+
+        if (x1 < minimumYear) x1 = minimumYear;
+        if (x2 > maximumYear) x2 = maximumYear;
+
+        if (x1 == x2) {
+          if (x1 == minimumYear) x2++;
+          else if (x2 == maximumYear) x1--;
+          else x2++;
+        }
+
+        from  = x1;
+        to = x2;
+      }
 
       selectionRange = d3.scaleLinear().range([x1, x2]);
       selectionRange.domain([x1, x2]);
     }
 
     function snapBrush() {
-      // TODO: Reword on this?
+      // TODO: Rework on this?
       if (!d3.event.sourceEvent) return; // Only transition after input.
       if (!d3.event.selection) return; // Ignore empty selections.
-      if (from == minimumYear && to == maximumYear) return;
 
       restart();
 
-      var selectedRange = range.map(selectionRange);
-      selectedRange = [Math.round(selectedRange[0]), Math.round(selectedRange[1])];
+      selectedRange = [x1, x2];
       d3.select(".brush").transition().call(brush.move, selectedRange.map(x));
     }
 
@@ -583,7 +673,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         var school = [];
         var language = [];
 
-        snapshot.forEach(function(object, index) {
+        snapshot.forEach(object => {
           keyword_node.push(keyword);
           degree_type.push(object.val().degree_type);
           relator.push(object.val().relator);
@@ -705,7 +795,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         // TODO: Create a bar on top to show the occurrence of the selected keyword in the schools
         var bar = d3.select(".frequency_bar").append("svg")
           .attr("id", "frequency_bar")
-          .attr("width", window.innerWidth)
+          .attr("width", window.innerWidth) // TODO: Make responsive
           .attr("height", 18);
 
         var architecturePercent = (bubble.a/bubble.total) * window.innerWidth;
@@ -723,22 +813,22 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .enter()
           .append("rect")
             .attr("id", "frequency_bar")
-            .attr("x", d => { return d.x; })
+            .attr("x", bar => { return bar.x; })
             .attr("y", 0)
-            .attr("width", d => { return d.width; })
+            .attr("width", bar => { return bar.width; })
             .attr("height", 75)
-            .style("fill", d => { return d.color; });
+            .style("fill", bar => { return bar.color; });
 
         bar.selectAll("text")
           .data(bars)
           .enter()
           .append("text")
-            .attr("dx", d => { return d.x + 25; })
+            .attr("dx", bar => { return bar.x + 25; })
             .attr("dy", 15)
             .attr("opacity", 0)
             .attr("font-family", "Poiret One")
             .attr("font-size", 15)
-            .text(d => { if (d.width != 0) return d.label + ": " + Math.round(d.width/window.innerWidth * 100 * 100) / 100 + "%"; })
+            .text(bar => { if (bar.width != 0) return bar.label + ": " + Math.round((bar.width/window.innerWidth * 100 * 100) / 100) + "%"; })
             .style("fill", "#212121")
             .transition()
               .attr("opacity", 1);
@@ -759,20 +849,20 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .data(circles)
           .enter()
           .append("circle")
-            .attr("cx", d => { return d.x; })
-            .attr("cy", d => { return d.y; })
-            .attr("r", d => { return d.r; })
-            .style("fill", d => { return d.color; });
+            .attr("cx", circle => { return circle.x; })
+            .attr("cy", circle => { return circle.y; })
+            .attr("r", circle => { return circle.r; })
+            .style("fill", circle => { return circle.color; });
 
         legendContainer.selectAll("text")
           .data(circles)
           .enter()
           .append("text")
-            .attr("dx", d => { return d.x + 25; })
-            .attr("dy", d => { return d.y + 5; })
+            .attr("dx", circle => { return circle.x + 25; })
+            .attr("dy", circle => { return circle.y + 5; })
             .attr("font-family", "Poiret One")
-            .text(d => { return d.label; })
-            .style("fill", d => { return "#E0E0E0"; });
+            .text(circle => { return circle.label; })
+            .style("fill", circle => { return "#E0E0E0"; });
 
         d3.select(".visualisation")
           .attr("align", "center");
@@ -796,8 +886,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .enter().append("path")
           .attr("class", "link")
           .attr("d", path)
-          .style("stroke-width", d => {
-            return Math.max(1, d.dy);
+          .style("stroke-width", link => {
+            return Math.max(1, link.dy);
           })
           .sort(function(a, b) {
             return b.dy - a.dy;
@@ -807,33 +897,31 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
         // add the link titles
         link.append("title")
-          .text(d => {
-            // Testing relator exploration
-            if (uniqueRelators.includes(d.target.name)) {
+          .text(link => {
+            if (uniqueRelators.includes(link.target.name)) {
               _relators.push({
-                name: d.target.name,
-                size: d.value
+                name: link.target.name,
+                size: link.value
               });
             }
-            // End Test
 
-            return d.source.name + " → " +
-              d.target.name + "\n" + format(d.value);
+            return link.source.name + " → " +
+              link.target.name + "\n" + format(link.value);
           });
 
         // add in the nodes
-        var node = svg.append("g").selectAll(".node")
+        var node = svg.append("g").selectAll("node")
           .data(graph.nodes)
           .enter().append("g")
           .attr("class", "node")
-          .attr("transform", d => {
-            return "translate(" + d.x + "," + d.y + ")";
+          .attr("transform", node => {
+            return "translate(" + node.x + "," + node.y + ")";
           })
           .call(d3.drag()
-            .subject(d => {
-              return d;
+            .subject(node => {
+              return node;
             })
-            .on("start", d => {
+            .on("start", node => {
               this.parentNode.appendChild(this);
             })
             .on("drag", dragmove)
@@ -841,58 +929,57 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
         // add the rectangles for the nodes
         node.append("rect")
-          .attr("height", d => {
-            return d.dy;
+          .attr("height", node => {
+            return node.dy;
           })
           .attr("width", sankey.nodeWidth())
-          .style("fill", d => {
+          .style("fill", node => {
             // return d.color = color(d.name.replace(/ .*/, ""));
-
-            if (uniqueDegreeTypes.includes(d.name)) {
+            if (uniqueDegreeTypes.includes(node.name)) {
               return d3.rgb('#00E5FF');
-            } else if (uniqueSchools.includes(d.name)) {
+            } else if (uniqueSchools.includes(node.name)) {
               return d3.rgb('#F50057');
-            } else if (uniqueLanguages.includes(d.name)) {
+            } else if (uniqueLanguages.includes(node.name)) {
               return d3.rgb('#FFC400');
-            } else if (uniqueRelators.includes(d.name)) {
+            } else if (uniqueRelators.includes(node.name)) {
               return d3.rgb('#76FF03');
             } else {
               return d3.rgb('#FF3D00');
             }
           })
-          .style("stroke", d => {
-            if (uniqueDegreeTypes.includes(d.name)) {
+          .style("stroke", node => {
+            if (uniqueDegreeTypes.includes(node.name)) {
               return d3.rgb('#00E5FF');
-            } else if (uniqueSchools.includes(d.name)) {
+            } else if (uniqueSchools.includes(node.name)) {
               return d3.rgb('#F50057');
-            } else if (uniqueLanguages.includes(d.name)) {
+            } else if (uniqueLanguages.includes(node.name)) {
               return d3.rgb('#FFC400');
-            } else if (uniqueRelators.includes(d.name)) {
+            } else if (uniqueRelators.includes(node.name)) {
               return d3.rgb('#76FF03');
             } else {
               return d3.rgb('#FF3D00');
             }
           })
           .append("title")
-          .text(d => {
-            return d.name + "\n" + format(d.value);
+          .text(node => {
+            return node.name + "\n" + format(node.value);
           });
 
         // add in the title for the nodes
         node.append("text")
           .style("fill", '#E0E0E0')
           .attr("x", -6)
-          .attr("y", d => {
-            return d.dy / 2;
+          .attr("y", node => {
+            return node.dy / 2;
           })
           .attr("dy", ".35em")
           .attr("text-anchor", "end")
           .attr("transform", null)
-          .text(d => {
-            return d.name;
+          .text(node => {
+            return node.name;
           })
-          .filter(d => {
-            return d.x < width / 2;
+          .filter(node => {
+            return node.x < width / 2;
           })
           .attr("x", 6 + sankey.nodeWidth())
           .attr("text-anchor", "start");
@@ -945,9 +1032,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       });
     });
 
-    var width = window.innerWidth,
-      height = window.innerHeight;
-
     var svg = d3.select("body").append("svg")
       .attr("width", width)
       .attr("height", height);
@@ -956,11 +1040,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
     var simulation = d3.forceSimulation()
       .force("link", d3.forceLink().distance(window.innerHeight * 0.2))
-      // .force("collide", d3.forceCollide().radius((3.14 * 400 * 2) / graph.nodes.length).iterations(1))
       .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(width / 2, height / 2))
-      // .force("x", d3.forceX())
-      // .force("y", d3.forceY())
 
     var link = svg.append("g")
       .attr("class", "links")
@@ -975,36 +1056,55 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .selectAll("circle")
       .data(graph.nodes)
       .enter().append("circle")
-      .attr("r", node => {
-        return node.id;
-      })
-      .attr("fill", "#1DE9B6")
-      .call(d3.drag()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended));
+        .attr("r", node => {
+          return node.id;
+        })
+        .attr("fill", "#1DE9B6")
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
+
+    var text = svg.append("g")
+      .attr("class", "text")
+      .selectAll("text")
+      .data(graph.nodes)
+      .enter().append("text")
+        .attr("dx", node => { node.x; })
+        .attr("dy", node => { node.y; })
+        .attr("font-family", "Poiret One")
+        .text(node => { return node.name; })
+        .style("fill", "#E0E0E0");
 
     var ticked = function() {
       link
-        .attr("x1", function(d) {
-          return d.source.x;
+        .attr("x1", function(link) {
+          return link.source.x;
         })
-        .attr("y1", function(d) {
-          return d.source.y;
+        .attr("y1", function(link) {
+          return link.source.y;
         })
-        .attr("x2", function(d) {
-          return d.target.x;
+        .attr("x2", function(link) {
+          return link.target.x;
         })
-        .attr("y2", function(d) {
-          return d.target.y;
+        .attr("y2", function(link) {
+          return link.target.y;
         });
 
       node
-        .attr("cx", function(d) {
-          return d.x;
+        .attr("cx", function(node) {
+          return node.x;
         })
-        .attr("cy", function(d) {
-          return d.y;
+        .attr("cy", function(node) {
+          return node.y;
+        });
+
+      text
+        .attr("dx", function(text) {
+          return text.x;
+        })
+        .attr("dy", function(text) {
+          return text.y;
         });
     }
 
@@ -1037,9 +1137,11 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     keywords = null;
     d3.select('#forceLayout').remove();
     d3.select('#timeline svg').remove();
+    $('#searchResults').hide();
     $('#play').hide();
     $('#pause').hide();
     $('#explore_relators').hide();
+    $('#explore_theses').hide();
     switch (navigate) {
       case 0:
         currentPage = 0;
@@ -1068,7 +1170,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           });
           d3.select('#frequency_bar').remove();
           d3.select('#tooltip').remove();
-          showForceLayout(minimumYear, maximumYear);
+          showForceLayout(0, 0);
         break;
       case 2:
         currentPage = 2;
@@ -1077,6 +1179,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         d3.select('#legend').remove();
         $('#alluvial_legend').show();
         $('#explore_relators').show();
+        $('#explore_theses').show();
 
         _exploringKeyword = bubble;
 
@@ -1106,6 +1209,56 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       navigateTo(1);
     } else if (currentPage == 3) {
       navigateTo(2, _exploringKeyword); // TODO: Add dynamic value
+    }  else if (currentPage == 4) {
+      // navigateTo(3, _exploringKeyword); // TODO: Add dynamic value
     }
   });
 });
+
+function showTheses() {
+    var input = 'milan';
+    var query = input.toLowerCase();
+    var ul = document.getElementById('thesesResults');
+
+    // Remove previous listener on the reference
+    firebase.database().ref('metadata').off();
+
+    firebase.database().ref('metadata/' + input).once('value', snapshot => {
+      snapshot.forEach(thesis => {
+        console.log(thesis)
+        $("#thesesResults").append(
+          $("<li>", {}).append(
+            $("<a>", { href: thesis.val().handle, target: "_blank" }).text(
+              thesis.val().title
+            )
+          )
+        )
+      });
+    });
+}
+
+function search() {
+  // TODO: Figure out a way to handle the search with the locally fetched keywords
+
+  var input = document.getElementById('search_query');
+  var query = input.value.toLowerCase();
+  var ul = document.getElementById('searchResults');
+  $('#searchResults').show();
+
+  // console.log(fetchedKeywords.length);
+
+  // Remove previous listener on the reference
+  firebase.database().ref('keywords').off();
+
+  if (query != '') {
+    firebase.database().ref('keywords').orderByKey().startAt(query).endAt(query + "\uf8ff").once('value', snapshot => {
+      $("#searchResults").empty();
+      snapshot.forEach(keyword => {
+        $("#searchResults").append($("<li>").text(keyword.key)).attr('href','/keyword/' + keyword.key);
+      });
+    });
+  } else {
+    $('#searchResults').hide();
+    $("#searchResults").empty();
+  }
+}
