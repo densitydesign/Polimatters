@@ -85,21 +85,11 @@ body {
 /* Force Layout */
 .searchbar {
   display: none;
-  text-align: center;
-}
-
-.searchbar input {
-  color: #E0E0E0;
   width: 55%;
   height: 40px;
   position: absolute;
+  text-align: center;
   top: 0;
-  font-size: 20px;
-  /*padding-left: 15px;*/
-  border: 0;
-  outline: 0;
-  background: transparent;
-  border-bottom: 1px solid #E0E0E0;
   left: 0;
   right: 0;
   margin-top: 65px;
@@ -107,26 +97,52 @@ body {
   margin-right: auto;
 }
 
-ul {
-  background: #424242;
+.searchbar input {
+  color: #E0E0E0;
+  width: 95%;
+  overflow: hidden;
+  font-size: 20px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.searchbar #search_clear {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #E0E0E0;
+  border-bottom: 1px solid #E0E0E0;
+  z-index: 9999;
+  font-size: 25px;
+  float: right;
+}
+
+.searchbar ul {
+  background: #E0E0E0;
   padding: 5px;
   max-height: 600px;
-  width: 55%;
+  width: 100%;
   left: 0;
   right: 0;
   list-style-type: none;
   margin-left: auto;
   margin-right: auto;
   z-index: 9999;
-  color: #E0E0E0;
-  margin-top: 105px;
-  position: relative;
+  color: #212121;
+  position: absolute;
   text-align: left;
   overflow: scroll;
+  /*-webkit-filter: blur(10px);
+  -moz-filter: blur(10px);
+  -o-filter: blur(10px);
+  -ms-filter: blur(10px);
+  filter: blur(10px);*/
 }
 
 ul li {
-  background: #616161;
+  background: #E0E0E0;
   margin: 5px;
 }
 
@@ -253,6 +269,7 @@ ul li:hover {
 }
 
 .explore_relators {
+  width: 150px;
   display: none;
   position: absolute;
   bottom: 0;
@@ -261,11 +278,29 @@ ul li:hover {
 }
 
 .explore_theses {
+  width: 150px;
   display: none;
   position: absolute;
-  right: 200px;
-  bottom: 0;
+  right: 0;
+  bottom: 30px;
   margin: 10px;
+}
+
+#thesesResults {
+  background: #E0E0E0;
+  padding: 5px;
+  max-height: 600px;
+  width: 100%;
+  left: 0;
+  right: 0;
+  list-style-type: none;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 9999;
+  color: #212121;
+  position: absolute;
+  text-align: left;
+  overflow: scroll;
 }
 
 #chart {
@@ -290,6 +325,43 @@ ul li:hover {
 
 .link:hover {
   stroke-opacity: .5;
+}
+
+.algolia-autocomplete {
+  width: 95%;
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 100%;
+  min-height: 30px;
+  text-indent: 10px;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 100%;
+  text-align: left;
+  padding-left: 15px;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #E0E0E0;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
 }
 
 ::-webkit-input-placeholder { /* Chrome */

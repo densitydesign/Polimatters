@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/vathsav/polimatters#readme",
   "dependencies": {
-    "quiver-firebase-search": "^1.0.6"
+    "quiver-firebase-search": "^1.0.6",
+    "firebase-admin": "^4.1.1",
+    "firebase-functions": "^0.5.1",
+    "algoliasearch": "^3.10.2"
   }
 }

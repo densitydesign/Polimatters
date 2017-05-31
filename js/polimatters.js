@@ -7,6 +7,10 @@ let colors = { e: "#00FFCA", a: "#FF3054", d: "#EEFF14" };
 let faculties = ["a", "e", "d"];
 var width = window.innerWidth,
   height = window.innerHeight;
+var bubbles = [];
+var searchedKeywordObject;
+var restart = function() {};
+var exploringKeyword = "";
 
 let architecture = [
   "architettura",
@@ -96,7 +100,10 @@ var minimumYear = 2008;
 var maximumYear = 2016;
 var bubble, text;
 var _exploringKeyword;
-var exploreRelators = function() {}
+var exploreRelators = function() {};
+var mouseEnter, mouseLeave = function() {};
+var searched = false;
+var searchedKeyword = false;
 
 // Fetch data
 // 54325 keywords
@@ -130,7 +137,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         year_node[year].total = word.total;
         year_node.total += year_node[year].total;
 
-        if (year_node.total >= 40) {
+        if (year_node.total >= 30) {
           total += year_node.total;
           fetchedKeywords.push(year_node);
         }
@@ -188,7 +195,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .attr("cy", center.y)
       .attr("rx", 0)
       .attr("ry", 0)
-      .attr("fill", "#E1BEE7")
+      .attr("fill", "#F8BBD0")
       .on("click", d => {
         $('#title').hide();
         $('#intro').hide();
@@ -199,7 +206,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .transition()
         .attr("rx", (total / size(total)) * .5) // TODO: modify later
         .attr("ry", (total / size(total)) * .5) // TODO: modify later
-        .style("fill", "#6A1B9A");
+        .style("fill", "#C2185B");
 
     svg.append("text")
       .attr("text-anchor", "middle")
@@ -207,7 +214,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .attr("dx", text => { return center.x; })
       .attr("dy", text => { return center.y + 9; }) // + fonts size / 2? TODO
       .attr("opacity", 0)
-      .attr("font-family", "Poiret One")
+      .attr("font-family", "Lato")
       .attr("font-size", 18)
       .text(text => { return "Politecnico di Milano"; })
       .style("fill", text => { return "#E0E0E0"; })
@@ -218,7 +225,12 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
   }
 
   function showForceLayout(from, to) {
-    var bubbles = [];
+    bubbles = [];
+
+    if (from == 0 && to == 0) {
+      from = x1 = minimumYear;
+      to = x2 = maximumYear;
+    }
 
     d3.select('#timeline svg').remove();
     d3.select('#forceLayout').remove();
@@ -276,6 +288,10 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       // Reset the keywords
       keywords = fetchedKeywords;
 
+      if (searchedKeywordObject) {
+        keywords.push(searchedKeywordObject);
+      }
+
       keywords.forEach(keyword => {
         let multiplier = 0;
         let upX = 0;
@@ -307,7 +323,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           colorGreen += multiplier * d3.color(colors[faculty]).g;
           colorBlue += multiplier * d3.color(colors[faculty]).b;
           down += multiplier;
-       });
+        });
 
         if (totalOccurrence > 0) {
           keyword.total = totalOccurrence; // Come on :/
@@ -421,23 +437,24 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
     simulation = d3.forceSimulation()
       .force("x", d3.forceX().strength(.1).x(bubble => {
-       return bubble.positionX;
+        if(bubble.keyword == "agriculture") return 150;
+        return bubble.positionX;
       }))
       .force("y", d3.forceY().strength(.1).y(bubble => {
-       return bubble.positionY;
+        if(bubble.keyword == "agriculture") return 150;
+        return bubble.positionY;
       }))
       .force("charge", d3.forceManyBody().strength(-1))
       .force("collide", d3.forceCollide().radius(bubble => {
-       return size(bubble.total) + .4;
-      }).iterations(1));
+        if (searchedKeywordObject && searchedKeywordObject.keyword == bubble.keyword)
+          return size(bubble.total * 100) + .4;
+        else return size(bubble.total) + .4;
+      }).iterations(2));
     // Make as efficient as possible
     // .force("center", d3.forceCenter(center.x, center.y));
 
-    function restart() {
-      if (simulation) {
-        simulation.stop();
-        console.log("stopped")
-      }
+    restart = function() {
+      if (simulation) simulation.stop();
       bubbles = [];
       computeKeywords();
 
@@ -458,7 +475,9 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         .append("circle")
           .attr("class", "keyword")
           .attr("r", bubble => {
-            return size(bubble.total);
+            if (searchedKeywordObject && searchedKeywordObject.keyword == bubble.keyword)
+              return size(bubble.total * 100);
+            else return size(bubble.total);
           })
           .style("fill", bubble => {
             return bubble.color;
@@ -481,24 +500,32 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         }).attr("y", text => {
           return text.y + 6;
         });
+
+        if (searchedKeyword) {
+          searched = true;
+          mouseEnter(searchedKeyword);
+        }
+        if (searchedKeywordObject) {
+          searched = true;
+          mouseEnter(searchedKeywordObject);
+        }
       }
 
-      function mouseEnter(bubble) {
-        tip.show(bubble);
+      mouseEnter = function(key) {
+        if (!searched) tip.show(key);
+
         d3.selectAll("line").remove();
 
-        if (!bubble.type) {
+        if (!key.type) {
           faculties.forEach(faculty => {
             g.append("line")
-              .attr("x1", d3.select(this).attr("cx"))
-              // .attr("x1", bubble.positionX)
+              .attr("x1", key.x)
+              .attr("y1", key.y)
               .attr("x2", facultyNodes[faculty].x)
-              .attr("y1", d3.select(this).attr("cy"))
-              // .attr("y1", bubble.positionY)
               .attr("y2", facultyNodes[faculty].y)
               .style("stroke", "#E0E0E0")
               .style("stroke-width", function(d) {
-                return lineScale(bubble[faculty]);
+                return lineScale(key[faculty]);
               });
            })
 
@@ -506,13 +533,29 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           d3.selectAll(".keyword")
             .style("opacity", 0.2);
           d3.selectAll(".keyword-text")
-            .style("opacity", 0);
+            .style("opacity", d => {
+                if (d.keyword == key.keyword)
+                  return 1;
+                  else return 0;
+            });
 
-          d3.select(this).style("opacity", 1);
+          if (key.total == 0) d3.selectAll("line").remove();
+
+          // if (searched) d3.select(bubble).style("opacity", 1);
         }
       }
 
-      function mouseLeave(bubble) {
+      mouseLeave = function(bubble) {
+        searched = false;
+        searchedKeyword = null;
+
+        if (searchedKeywordObject && fetchedKeywords.includes(searchedKeywordObject)) {
+          var index = fetchedKeywords.indexOf(searchedKeywordObject);
+          if (index > -1)
+            fetchedKeywords.splice(index, 1);
+        }
+        searchedKeywordObject = null;
+
         tip.hide(bubble);
         d3.selectAll("line").remove();
         d3.selectAll(".keyword")
@@ -522,6 +565,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           d3.selectAll(".keyword-text")
             .style("opacity", d => { return d.total > 100 ? 1 : 0; });
         });
+
+        restart();
       }
 
       // TODO: Labels for the bubbles
@@ -538,7 +583,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .attr("text-anchor", d => {
             return faculties.includes(d.keyword) ? "middle" : "left";
           })
-          .attr("font-family", "Poiret One")
+          .attr("font-family", "Lato")
           .attr("font-size", 15)
           .text(d => {
             if (d.keyword == 'a') return "Architecture";
@@ -591,6 +636,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           from = 2008;
           to = toYear++;
           restart();
+
           delay = 2500;
           animate();
         }
@@ -608,7 +654,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     function brushed() {
       if (!d3.event.sourceEvent) return; // Only transition after input.
       if (!d3.event.selection) return; // Ignore empty selections.
-
 
       if (from == 0 && to == 0) {
         from = x1 = minimumYear;
@@ -658,7 +703,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
   function exploreKeyword(bubble) {
     var keyword = bubble.keyword;
-    console.log(keyword);
+    exploringKeyword = keyword;
 
     d3.select('svg').remove();
     var metadata = {};
@@ -826,9 +871,9 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
             .attr("dx", bar => { return bar.x + 25; })
             .attr("dy", 15)
             .attr("opacity", 0)
-            .attr("font-family", "Poiret One")
+            .attr("font-family", "Lato")
             .attr("font-size", 15)
-            .text(bar => { if (bar.width != 0) return bar.label + ": " + Math.round((bar.width/window.innerWidth * 100 * 100) / 100) + "%"; })
+            // .text(bar => { if (bar.width != 0) return bar.label + ": " + Math.round((bar.width/window.innerWidth * 100 * 100) / 100) + "%"; })
             .style("fill", "#212121")
             .transition()
               .attr("opacity", 1);
@@ -860,7 +905,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .append("text")
             .attr("dx", circle => { return circle.x + 25; })
             .attr("dy", circle => { return circle.y + 5; })
-            .attr("font-family", "Poiret One")
+            .attr("font-family", "Lato")
             .text(circle => { return circle.label; })
             .style("fill", circle => { return "#E0E0E0"; });
 
@@ -1014,10 +1059,14 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
   function showRelators() {
     var graph = { nodes: [], links: []};
 
+    var relatorSize = d3.scaleSqrt()
+        .domain([0, 1000])
+        .range([0, 80]);
+
     // Push the middle node
     graph.nodes.push({
-      name: "keyword",
-      id: 25
+      name: exploringKeyword,
+      id: 40
     });
 
     _relators.forEach(function(relator, index) {
@@ -1057,7 +1106,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .data(graph.nodes)
       .enter().append("circle")
         .attr("r", node => {
-          return node.id;
+          if (node.name == exploringKeyword) return 50;
+          return relatorSize(node.id);
         })
         .attr("fill", "#1DE9B6")
         .call(d3.drag()
@@ -1069,12 +1119,16 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .attr("class", "text")
       .selectAll("text")
       .data(graph.nodes)
-      .enter().append("text")
+      .enter()
+        .append("text")
         .attr("dx", node => { node.x; })
         .attr("dy", node => { node.y; })
-        .attr("font-family", "Poiret One")
+        .attr("font-family", "Lato")
         .text(node => { return node.name; })
-        .style("fill", "#E0E0E0");
+        .style("fill", d => {
+          if (d.name == exploringKeyword) return "#212121";
+          else return "#E0E0E0";
+        });
 
     var ticked = function() {
       link
@@ -1101,10 +1155,11 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
       text
         .attr("dx", function(text) {
-          return text.x;
+          if (text.name == exploringKeyword) return text.x - 20;
+          else return text.x + 10;
         })
         .attr("dy", function(text) {
-          return text.y;
+          return text.y + 5;
         });
     }
 
@@ -1164,12 +1219,13 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         d3.select("ellipse").transition()
           .attr("rx", 0)
           .attr("ry", 0)
-          .style("fill", "#E1BEE7")
+          .style("fill", "#C2185B")
           .on("end", d => {
             d3.select("svg").remove();
           });
           d3.select('#frequency_bar').remove();
           d3.select('#tooltip').remove();
+
           showForceLayout(0, 0);
         break;
       case 2:
@@ -1193,7 +1249,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       case 3:
         currentPage = 3;
         d3.select('#frequency_bar').remove();
-        d3.select('#alluvial_legend').remove();
+        $('#alluvial_legend').hide();
         d3.select('#alluvial_chart').remove();
         $(".visualisation").css({ position: 'absolute' });
         showRelators();
@@ -1216,48 +1272,137 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 });
 
 function showTheses() {
-    var input = 'milan';
-    var query = input.toLowerCase();
-    var ul = document.getElementById('thesesResults');
+  var input = 'milan';
+  var query = input.toLowerCase();
+  var ul = document.getElementById('thesesResults');
 
-    // Remove previous listener on the reference
-    firebase.database().ref('metadata').off();
+  // Remove previous listener on the reference
+  firebase.database().ref('metadata').off();
 
-    firebase.database().ref('metadata/' + input).once('value', snapshot => {
-      snapshot.forEach(thesis => {
-        console.log(thesis)
-        $("#thesesResults").append(
-          $("<li>", {}).append(
-            $("<a>", { href: thesis.val().handle, target: "_blank" }).text(
-              thesis.val().title
-            )
+  firebase.database().ref('metadata/' + input).once('value', snapshot => {
+    snapshot.forEach(thesis => {
+      $("#thesesResults").append(
+        $("<li>", {}).append(
+          $("<a>", { href: thesis.val().handle, target: "_blank" }).text(
+            thesis.val().title
           )
         )
-      });
+      )
     });
+  });
 }
 
-function search() {
-  // TODO: Figure out a way to handle the search with the locally fetched keywords
+$('#search_clear').click(function(d) {
+  mouseLeave();
+  $('#search_query').val('');
+  $('#searchResults').hide();
+  $("#searchResults").empty();
+});
 
+function search() {
   var input = document.getElementById('search_query');
   var query = input.value.toLowerCase();
   var ul = document.getElementById('searchResults');
   $('#searchResults').show();
 
-  // console.log(fetchedKeywords.length);
-
   // Remove previous listener on the reference
   firebase.database().ref('keywords').off();
 
   if (query != '') {
+    var found = false;
     firebase.database().ref('keywords').orderByKey().startAt(query).endAt(query + "\uf8ff").once('value', snapshot => {
       $("#searchResults").empty();
-      snapshot.forEach(keyword => {
-        $("#searchResults").append($("<li>").text(keyword.key)).attr('href','/keyword/' + keyword.key);
+      snapshot.forEach(result => {
+        $("#searchResults").append($("<li>").text(result.key).on('click', d => {
+          $('#searchResults').hide();
+          d3.selectAll(".keyword")
+            .filter(node => { return node.keyword == result.key})
+            .each(node => { found = true; searched = true; searchedKeyword = node; mouseEnter(node); });
+
+          if (!found) {
+            firebase.database().ref('keywords/' + result.key).once('value', snapshot => {
+              searchedKeywordObject = snapshot.val();
+              var year_node = { total: 0 };
+
+              let chosenYears = years;
+              var occurrencesPerYear = [];
+              let multiplier = 0;
+              let upX = 0;
+              let upY = 0;
+              let down = 0;
+              let colorRed = 0;
+              let colorGreen = 0;
+              let colorBlue = 0;
+              let schools = { a: 0, d: 0, e: 0 };
+              let totalOccurrence = 0;
+
+              // Split by years
+              years.forEach(year => {
+                if (searchedKeywordObject[year]) {
+                  var word = searchedKeywordObject[year];
+                  year_node[year] = { a: 0, d: 0, e: 0, total: 0 }
+
+                  architecture.forEach(course => {
+                    if (Object.keys(word).includes(course))
+                      year_node[year].a += word[course];
+                  });
+
+                  design.forEach(course => {
+                    if (Object.keys(word).includes(course))
+                      year_node[year].d += word[course];
+                  });
+
+                  engineering.forEach(course => {
+                    if (Object.keys(word).includes(course))
+                      year_node[year].e += word[course];
+                  });
+
+                  year_node.keyword = result.key;
+                  year_node[year].keyword = result.key;
+                  year_node[year].total = word.total;
+                  year_node.total += year_node[year].total;
+                }
+              });
+
+              searchedKeywordObject = year_node;
+
+              restart();
+
+              // faculties.forEach(faculty => {
+              //   // Figure out what faculties a keyword belongs to
+              //   var multiplier = parseFloat(schools[faculty] / totalOccurrence);
+              //   upX += multiplier * facultyNodes[faculty].x;
+              //   upY += multiplier * facultyNodes[faculty].y;
+              //   colorRed += multiplier * d3.color(colors[faculty]).r;
+              //   colorGreen += multiplier * d3.color(colors[faculty]).g;
+              //   colorBlue += multiplier * d3.color(colors[faculty]).b;
+              //   down += multiplier;
+              // });
+
+              // if (totalOccurrence > 0) {
+              //   keyword.total = totalOccurrence; // Come on :/
+              //   keyword.positionX = upX / down;
+              //   keyword.positionY = upY / down;
+              //   keyword.a = schools.a;
+              //   keyword.d = schools.d;
+              //   keyword.e = schools.e;
+              //   let color = d3.rgb(colorRed, colorGreen, colorBlue);
+              //   let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center.x, 2) + Math.pow(keyword.positionY - center.y, 2));
+              //   keyword.color = color.brighter(lightness / 0.0080);
+              //
+              //   bubbles = bubbles.concat(keyword);
+              //
+              //   console.log(keyword);
+              //
+              //   mouseEnter(keyword);
+              // }
+            });
+          }
+        }));
       });
     });
   } else {
+    $('#search_query').val('');
     $('#searchResults').hide();
     $("#searchResults").empty();
   }

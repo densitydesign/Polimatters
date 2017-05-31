@@ -17,15 +17,14 @@
     <link rel="icon" href="img/favicon.png" type="image/gif" sizes="32x32">
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Lato|Mukta+Vaani:300" rel="stylesheet">
-
-    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Mukta+Vaani:300" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Didact+Gothic" rel="stylesheet">
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Lora:400" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
@@ -59,7 +58,7 @@
     <div class="visualisation" id="visualisation"></div>
 
     <div class="toggle_language" id="toggle_language">
-      <p><a href="">IT</a></p>
+      <!-- <p><a href="">IT</a></p> -->
     </div>
 
     <div class="logo">
@@ -69,7 +68,7 @@
     <button class="fa fa-arrow-left" aria-hidden="true" id="back"></button>
 
     <button class="explore_relators" id="explore_relators" onclick="exploreRelators()">Explore Relators</button>
-    <button type="button" class="explore_theses" id="explore_theses" onclick="showTheses()" data-toggle="modal" data-target="#thesesModal">Read Open Theses</button>
+    <button type="button" class="explore_theses" id="explore_theses" onclick="showTheses()" data-toggle="modal" data-target="#thesesModal">Read Theses</button>
 
     <!-- Modal -->
     <div id="thesesModal" class="modal fade" role="dialog">
@@ -79,7 +78,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Modal Header</h4>
+            <h4 class="modal-title">List of Theses</h4>
           </div>
           <div class="modal-body">
             <ul id="thesesResults"></ul>
@@ -93,8 +92,10 @@
     </div>
 
     <div class="searchbar" id="searchbar">
-      <input type="text" id="search_query" onkeyup="search()" placeholder="Search">
+      <input type="text" id="search_query" placeholder="Search">
+      <button class="fa fa-times" aria-hidden="true" id="search_clear"></button>
 
+      <div class="searchResultBackground"></div>
       <ul id="searchResults"></ul>
     </div>
 
@@ -134,10 +135,95 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.min.js"></script>
     <script src="js/crossfilter.js"></script>
     <script src="js/sankey.js"></script>
     <script src="js/d3-tip.js"></script>
     <script src="js/polimatters.js"></script>
+
+    <script type="text/javascript">
+      var client = algoliasearch("BM1OHPMZOP", "b99b3d0c2bbf178129c55cebd6117d04");
+      var index = client.initIndex('keywords');
+      autocomplete('#search_query',
+        { hint: true }, {
+            source: autocomplete.sources.hits(index, { hitsPerPage: 20 }),
+            displayKey: 'objectID',
+            templates: {
+                suggestion: function(suggestion) {
+                  return '<span>' + suggestion.objectID + '</span>'
+                }
+            }
+        }).on("autocomplete:selected", function(t, e) {
+          var word = e.objectID;
+
+          var found = false;
+          d3.selectAll(".keyword")
+            .filter(node => { return node.keyword == word; })
+            .each(node => { if (!found) { found = true; searched = true; searchedKeyword = node; }});
+
+
+          if (found) {
+            bubbles.forEach(bubble => {
+              if (bubble.keyword == searchedKeyword.keyword) {
+                mouseEnter(bubble);
+              }
+            })
+          }
+
+          if (!found) {
+            searchedKeywordObject = e;
+            searchedKeywordObject.keyword = e.objectID;
+            delete searchedKeywordObject.objectID;
+
+            var year_node = { total: 0 };
+            let chosenYears = years;
+            var occurrencesPerYear = [];
+            let multiplier = 0;
+            let upX = 0;
+            let upY = 0;
+            let down = 0;
+            let colorRed = 0;
+            let colorGreen = 0;
+            let colorBlue = 0;
+            let schools = { a: 0, d: 0, e: 0 };
+            let totalOccurrence = 0;
+
+            // Split by years
+            years.forEach(year => {
+              if (searchedKeywordObject[year]) {
+                var word = searchedKeywordObject[year];
+                year_node[year] = { a: 0, d: 0, e: 0, total: 0 }
+
+                architecture.forEach(course => {
+                  if (Object.keys(word).includes(course))
+                    year_node[year].a += word[course];
+                });
+
+                design.forEach(course => {
+                  if (Object.keys(word).includes(course))
+                    year_node[year].d += word[course];
+                });
+
+                engineering.forEach(course => {
+                  if (Object.keys(word).includes(course))
+                    year_node[year].e += word[course];
+                });
+
+                year_node.keyword = e.keyword;
+                year_node[year].keyword = e.keyword;
+                year_node[year].total = word.total;
+                year_node.total += year_node[year].total;
+              }
+            });
+
+            searchedKeywordObject = year_node;
+
+            restart();
+          }
+        });
+    </script>
 </body>
 
 </html>
