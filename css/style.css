@@ -282,14 +282,25 @@ ul li:hover {
   display: none;
   position: absolute;
   right: 0;
-  bottom: 30px;
+  bottom: 0;
   margin: 10px;
 }
 
+#thesesModal {
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: transparent;
+  width: 70%;
+}
+
+.modal-body {
+  height: 600px;
+}
+
 #thesesResults {
-  background: #E0E0E0;
   padding: 5px;
-  max-height: 600px;
+  height: 100%;
   width: 100%;
   left: 0;
   right: 0;
@@ -301,6 +312,10 @@ ul li:hover {
   position: absolute;
   text-align: left;
   overflow: scroll;
+}
+
+#thesesResults li {
+  background: #FFF;
 }
 
 #chart {

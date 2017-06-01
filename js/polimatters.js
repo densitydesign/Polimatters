@@ -138,7 +138,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         year_node.total += year_node[year].total;
 
         if (year_node.total >= 30) {
-          total += year_node.total;
           fetchedKeywords.push(year_node);
         }
       }
@@ -146,9 +145,18 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
   });
 }).then(v => {
   console.log("ready!");
+  var uniqueKeywords = [];
+  $.each(fetchedKeywords, function(i, keyword){
+    if($.inArray(keyword, uniqueKeywords) === -1) uniqueKeywords.push(keyword);
+    total += keyword.total;
+  });
+
+  fetchedKeywords = uniqueKeywords;
 
   var tip = d3.tip();
   var svg, g;
+
+  console.log("total: " + total);
 
   total = 20000;
 
@@ -284,6 +292,13 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       var occurrencesPerYear = [];
 
       bubbles = [];
+
+      // Dummy keyword in the beginning of the array.
+      // For some reason, the first bubble in the array always ticks at 0, 0 even though the cx and cy values are set properly.
+      bubbles.push({
+        "keyword": "1@337!",
+        "total": 0
+      });
 
       // Reset the keywords
       keywords = fetchedKeywords;
@@ -437,18 +452,14 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
     simulation = d3.forceSimulation()
       .force("x", d3.forceX().strength(.1).x(bubble => {
-        if(bubble.keyword == "agriculture") return 150;
         return bubble.positionX;
       }))
       .force("y", d3.forceY().strength(.1).y(bubble => {
-        if(bubble.keyword == "agriculture") return 150;
         return bubble.positionY;
       }))
       .force("charge", d3.forceManyBody().strength(-1))
       .force("collide", d3.forceCollide().radius(bubble => {
-        if (searchedKeywordObject && searchedKeywordObject.keyword == bubble.keyword)
-          return size(bubble.total * 100) + .4;
-        else return size(bubble.total) + .4;
+        return size(bubble.total) + .4;
       }).iterations(2));
     // Make as efficient as possible
     // .force("center", d3.forceCenter(center.x, center.y));
@@ -476,14 +487,14 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .attr("class", "keyword")
           .attr("r", bubble => {
             if (searchedKeywordObject && searchedKeywordObject.keyword == bubble.keyword)
-              return size(bubble.total * 100);
+              return 5;
             else return size(bubble.total);
           })
           .style("fill", bubble => {
             return bubble.color;
           })
           .on('click', bubble => {
-            navigateTo(2, bubble);
+            if (!bubble.type) navigateTo(2, bubble);
           })
           .on('mouseover', mouseEnter)
           .on('mouseleave', mouseLeave);
@@ -540,8 +551,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
             });
 
           if (key.total == 0) d3.selectAll("line").remove();
-
-          // if (searched) d3.select(bubble).style("opacity", 1);
         }
       }
 
@@ -750,13 +759,24 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           nodes.push(node);
         }
 
+        var othersNodeId = 9999;
+
         var addLink = function(source, target) {
           var found = false;
+
           if (links.length != 0) {
             links.forEach(link => {
               if (link.source == source && link.target == target) {
                 found = true; // Link already exists.
-                link.value = link.value + 1;
+
+                if (target == othersNodeId) {
+                  // console.log(othersNodeId)
+                  // console.log(link.value);
+                  // link.value = 26;
+                  link.value = link.value + 1;
+                } else {
+                  link.value = link.value + 1;
+                }
               }
             });
 
@@ -777,6 +797,9 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           }
         }
 
+        // TODO: Remove the links to the relators that have contributed to only 1 thesis.
+        // These relators must be aggregated to a single 'others' node.
+
         // Create links
         for (var thesis = 0; thesis < numberOfTheses; thesis++) {
           nodes.forEach(sourceNode => {
@@ -796,6 +819,58 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
               }
               if (sourceNode.name == school[thesis] && targetNode.name == relator[thesis]) {
                 addLink(sourceNode.node, targetNode.node);
+              }
+            });
+          });
+        }
+
+        var finalRelators = [];
+
+        nodes.forEach(node => {
+          if (uniqueRelators.includes(node.name)) {
+            // TODO: If unique relators.length > something
+            links.forEach(link => {
+              if (link.target == node.node) {
+                if (link.value != 1) finalRelators.push(node.name);
+              }
+            });
+          }
+        });
+
+        allNodes = chosenKeyword.concat(uniqueLanguages, uniqueDegreeTypes, uniqueSchools, finalRelators);
+        othersNodeId = allNodes.length;
+        nodes = [];
+
+        // Each of these unique values are nodes
+        for (var i = 0; i < allNodes.length; i++) {
+          var node = {
+            "node": i,
+            "name": allNodes[i]
+          };
+          nodes.push(node);
+        }
+
+        nodes.push({
+          "node": othersNodeId,
+          "name":"others"
+        });
+
+        // Create links again
+        links = [];
+        for (var thesis = 0; thesis < numberOfTheses; thesis++) {
+          nodes.forEach(sourceNode => {
+            nodes.forEach(targetNode => {
+              // Check for a link between the source and the target nodes
+              if (sourceNode.name == keyword_node[thesis] && targetNode.name == language[thesis]) {
+                addLink(sourceNode.node, targetNode.node);
+              } else if (sourceNode.name == language[thesis] && targetNode.name == degree_type[thesis]) {
+                addLink(sourceNode.node, targetNode.node);
+              } else if (sourceNode.name == degree_type[thesis] && targetNode.name == school[thesis]) {
+                addLink(sourceNode.node, targetNode.node);
+              } else if (sourceNode.name == school[thesis] && targetNode.name == relator[thesis]) {
+                addLink(sourceNode.node, targetNode.node);
+              } else if (sourceNode.name == school[thesis] && targetNode.name == "others") {
+                addLink(sourceNode.node, othersNodeId);
               }
             });
           });
@@ -851,7 +926,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           {x: 0, width: architecturePercent, color: colors.a, label: "Architecture"},
           {x: architecturePercent, width: designPercent, color: colors.d, label: "Design"},
           {x: architecturePercent + designPercent, width: engineeringPercent, color: colors.e, label: "Engineering"}
-        ]
+        ];
 
         bar.selectAll("rect")
           .data(bars)
@@ -986,7 +1061,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
               return d3.rgb('#F50057');
             } else if (uniqueLanguages.includes(node.name)) {
               return d3.rgb('#FFC400');
-            } else if (uniqueRelators.includes(node.name)) {
+            } else if (uniqueRelators.includes(node.name) || node.name == 'others') {
               return d3.rgb('#76FF03');
             } else {
               return d3.rgb('#FF3D00');
@@ -999,7 +1074,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
               return d3.rgb('#F50057');
             } else if (uniqueLanguages.includes(node.name)) {
               return d3.rgb('#FFC400');
-            } else if (uniqueRelators.includes(node.name)) {
+            } else if (uniqueRelators.includes(node.name) || node.name == 'others') {
               return d3.rgb('#76FF03');
             } else {
               return d3.rgb('#FF3D00');
@@ -1040,9 +1115,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           sankey.relayout();
           link.attr("d", path);
         }
-      })
-      .catch(e => {
-        console.log("Failed to fetch :( " + e);
       });
   }
 
@@ -1227,6 +1299,10 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           d3.select('#tooltip').remove();
 
           showForceLayout(0, 0);
+          mouseLeave();
+          $('#search_query').val('');
+          $('#searchResults').hide();
+          $("#searchResults").empty();
         break;
       case 2:
         currentPage = 2;
@@ -1265,14 +1341,14 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       navigateTo(1);
     } else if (currentPage == 3) {
       navigateTo(2, _exploringKeyword); // TODO: Add dynamic value
-    }  else if (currentPage == 4) {
+    } else if (currentPage == 4) {
       // navigateTo(3, _exploringKeyword); // TODO: Add dynamic value
     }
   });
 });
 
 function showTheses() {
-  var input = 'milan';
+  var input = _exploringKeyword.keyword;
   var query = input.toLowerCase();
   var ul = document.getElementById('thesesResults');
 
