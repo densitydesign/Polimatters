@@ -35,6 +35,19 @@ body {
   color: #00FFCA;
 }
 
+#polimi_bubble {
+  /*
+  -webkit-animation: pulse 3s ease-out;
+  -moz-animation: pulse 3s ease-out;
+  animation: pulse 3s ease-out;
+  -webkit-animation-iteration-count: infinite;
+  -moz-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+  */
+  z-index: 1;
+  opacity: 1;
+}
+
 #back {
   border: 0;
   outline: 0;
@@ -63,49 +76,45 @@ body {
   left: 0;
 }
 
-
 .logo {
   position: absolute;
   bottom: 0;
   margin: 25px;
 }
 
+.logo img {
+  padding-right: 35px;
+}
+
 .credits {
   position: absolute;
-  margin-left: auto;
-  margin-right: auto;
-  left: 0;
-  right: 0;
+  right: 20px;
   bottom: 25px;
   width: 30%;
   text-align: center;
   color: #E0E0E0;
 }
 
+.credits h4 {
+  font-weight: bold;
+}
+
 /* Force Layout */
 .searchbar {
   display: none;
-  width: 55%;
-  height: 40px;
+  width: 20%;
   position: absolute;
-  text-align: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  margin-top: 65px;
-  margin-left: auto;
-  margin-right: auto;
+  right: 30px;
+  border-bottom: 1px solid #E0E0E0;
 }
 
 .searchbar input {
   color: #E0E0E0;
-  width: 95%;
   overflow: hidden;
   font-size: 20px;
   border: 0;
   outline: 0;
   background: transparent;
-  border-bottom: 1px solid #E0E0E0;
 }
 
 .searchbar #search_clear {
@@ -113,7 +122,6 @@ body {
   outline: 0;
   background: transparent;
   color: #E0E0E0;
-  border-bottom: 1px solid #E0E0E0;
   z-index: 9999;
   font-size: 25px;
   float: right;
@@ -139,6 +147,43 @@ body {
   -o-filter: blur(10px);
   -ms-filter: blur(10px);
   filter: blur(10px);*/
+}
+
+.algolia-autocomplete {
+  width: 80%;
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 100%;
+  min-height: 30px;
+  text-indent: 10px;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 120%;
+  text-align: left;
+  padding-left: 15px;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #E0E0E0;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
 }
 
 ul li {
@@ -342,43 +387,6 @@ ul li:hover {
   stroke-opacity: .5;
 }
 
-.algolia-autocomplete {
-  width: 95%;
-}
-
-.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
-  width: 100%;
-  min-height: 30px;
-  text-indent: 10px;
-}
-
-.algolia-autocomplete .aa-hint {
-  color: #999;
-}
-
-.algolia-autocomplete .aa-dropdown-menu {
-  width: 100%;
-  text-align: left;
-  padding-left: 15px;
-  background-color: #fff;
-  border: 1px solid #999;
-  border-top: none;
-}
-
-.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
-  cursor: pointer;
-  padding: 5px 4px;
-}
-
-.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
-  background-color: #E0E0E0;
-}
-
-.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
-  font-weight: bold;
-  font-style: normal;
-}
-
 ::-webkit-input-placeholder { /* Chrome */
   color: #E0E0E0;
 }
@@ -392,4 +400,61 @@ ul li:hover {
 :-moz-placeholder { /* Firefox 4 - 18 */
   color: #E0E0E0;
   opacity: 1;
+}
+
+.pulse {
+  width: 10px;
+  height: 10px;
+  border: 5px solid #f7f14c;
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+  border-radius: 30px;
+  background-color: #716f42;
+  z-index: 10;
+}
+
+@-moz-keyframes pulse {
+ 0% {
+    -moz-transform: scale(0);
+    opacity: 0.0;
+ }
+ 25% {
+    -moz-transform: scale(0);
+    opacity: 0.1;
+ }
+ 50% {
+    -moz-transform: scale(0.1);
+    opacity: 0.3;
+ }
+ 75% {
+    -moz-transform: scale(0.5);
+    opacity: 0.5;
+ }
+ 100% {
+    -moz-transform: scale(1);
+    opacity: 0.0;
+ }
+}
+
+@-webkit-keyframes "pulse" {
+ 0% {
+    -webkit-transform: scale(0);
+    opacity: 0.0;
+ }
+ 25% {
+    -webkit-transform: scale(0);
+    opacity: 0.1;
+ }
+ 50% {
+    -webkit-transform: scale(0.1);
+    opacity: 0.3;
+ }
+ 75% {
+    -webkit-transform: scale(0.5);
+    opacity: 0.5;
+ }
+ 100% {
+    -webkit-transform: scale(1);
+    opacity: 0.0;
+ }
 }

@@ -60,7 +60,6 @@ let engineering = [
   "ingegneria informatica",
   "ingegneria matematica",
   "ingegneria meccanica",
-  "ingegneria biomedica",
   "ingegneria nucleare",
   "ingegneria per l'ambiente e il territorio",
   "ingegneria per l'ambiente e il territorio - environmental and land planning engineering",
@@ -100,7 +99,6 @@ var minimumYear = 2008;
 var maximumYear = 2016;
 var bubble, text;
 var _exploringKeyword;
-var exploreRelators = function() {};
 var mouseEnter, mouseLeave = function() {};
 var searched = false;
 var searchedKeyword = false;
@@ -137,7 +135,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         year_node[year].total = word.total;
         year_node.total += year_node[year].total;
 
-        if (year_node.total >= 30) {
+        if (year_node.total >= 15) {
           fetchedKeywords.push(year_node);
         }
       }
@@ -146,7 +144,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 }).then(v => {
   console.log("ready!");
   var uniqueKeywords = [];
-  $.each(fetchedKeywords, function(i, keyword){
+  $.each(fetchedKeywords, (i, keyword) => {
     if($.inArray(keyword, uniqueKeywords) === -1) uniqueKeywords.push(keyword);
     total += keyword.total;
   });
@@ -191,21 +189,19 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
   function showHome() {
     initSVG();
-
-    $('#title').show();
     $('#intro').show();
     $('#credits').show();
     $('#back').hide();
 
     // Polimi Circle
     var polimiBubble = svg.append("ellipse")
+      .attr("id", 'polimi_bubble')
       .attr("cx", center.x)
       .attr("cy", center.y)
       .attr("rx", 0)
       .attr("ry", 0)
       .attr("fill", "#F8BBD0")
       .on("click", d => {
-        $('#title').hide();
         $('#intro').hide();
         $('#credits').hide();
         $('#back').show();
@@ -246,7 +242,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     currentPage = 1;
 
     var departments = [];
-    faculties.forEach(function(faculty, index) {
+    faculties.forEach((faculty, index) => {
       facultyNodes[faculty] = {
         x: center.x + radius * Math.cos(2 * Math.PI * (index / faculties.length)),
         y: center.y + radius * Math.sin(2 * Math.PI * (index / faculties.length))
@@ -254,7 +250,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     });
 
     // Faculties circles
-    _.forEach(facultyNodes, function(value, key) {
+    _.forEach(facultyNodes, (value, key) => {
       // Push the faculty nodes into the set of keywords (so that they can be mapped together)
       departments.push({
         keyword: key,
@@ -389,16 +385,16 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
 
     var context = svg.append("g")
         .attr("class", "context")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", `translate(${margin.left}, ${margin.right})`);
 
-    // var xMin = d3.min(data, function(d) { return d.year; });
+    // var xMin = d3.min(data, d => { return d.year; });
     var xMin = 2008;
     var yMax = Math.max(20, d3.max(data, d => { return d.total; }));
 
     x.domain([xMin, 2016]);
     y.domain([0, yMax]);
 
-    var num_messages = function(dataArray, domainRange) { return d3.sum(dataArray, function(d) {
+    var num_messages = (dataArray, domainRange) => { return d3.sum(dataArray, d => {
         return d.total >= domainRange.domain()[0] && d.total <= domainRange.domain()[1];
       });
     }
@@ -411,17 +407,17 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .attr('class', 'messageContext')
           .attr('fill', "#1DE9B6")
           .style("opacity", 1)
-          // .attr("r", 5)
-          // .attr("cx", d => { return x(d.year); })
-          // .attr("cy", d => { return y(d.total); })
           .attr("x", d => { return x(d.year); })
-          .attr("y", d => { return y(d.total); })
+          .attr("y", 0)
           .attr("width", width / 8)
-          .attr("height", d => { return 50 - y(d.total); })
+          .attr("height", 0)
+          .transition()
+            .attr("y", d => { return y(d.total); })
+            .attr("height", d => { return 50 - y(d.total); });
 
     context.append("g")
           .attr("class", "brushAxis")
-          .attr("transform", "translate(0," + height + ")")
+          .attr("transform", `translate(0, ${height})`)
           .call(xAxis);
 
     context.append("g")
@@ -443,9 +439,9 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           if (bubble.keyword == 'a') department = 'Architecture';
           else if (bubble.keyword == 'd') department = 'Design';
           else if (bubble.keyword == 'e') department = 'Engineering';
-          return "<strong style='color: #E0E0E0;'>Department: </strong> <span style='color:red'>" + department + "</span>";
+          return "<strong style='color: #E0E0E0;'>Department: </strong> <span style='color: #26C6DA;'>" + department + "</span>";
         }
-        return "<strong style='color: #E0E0E0;'>Word:</strong> <span style='color:red'>" + bubble.keyword + "</span> <br> <strong style='color: #E0E0E0;'>Architecture:</strong> <span style='color:red'>" + bubble.a + "</span> <br> <strong style='color: #E0E0E0;'>Design:</strong> <span style='color:red'>" + bubble.d + "</span> <br> <strong style='color: #E0E0E0;'>Engineering:</strong> <span style='color:red'>" + bubble.e + "</span>";
+        return "<strong style='color: #E0E0E0;'>Architecture:</strong> <span style='color: #26C6DA;'>" + bubble.a + "</span> <br> <strong style='color: #E0E0E0;'>Design:</strong> <span style='color: #26C6DA;'>" + bubble.d + "</span> <br> <strong style='color: #E0E0E0;'>Engineering:</strong> <span style='color: #26C6DA;'>" + bubble.e + "</span>";
       });
 
     var simulation;
@@ -460,9 +456,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       .force("charge", d3.forceManyBody().strength(-1))
       .force("collide", d3.forceCollide().radius(bubble => {
         return size(bubble.total) + .4;
-      }).iterations(2));
-    // Make as efficient as possible
-    // .force("center", d3.forceCenter(center.x, center.y));
+      }).iterations(1));
 
     restart = function() {
       if (simulation) simulation.stop();
@@ -500,6 +494,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .on('mouseleave', mouseLeave);
 
       function ticked() {
+        // TEST: Try skipping a few ticks.
         bubble.attr("cx", bubble => {
           return bubble.x;
         }).attr("cy", bubble => {
@@ -522,7 +517,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         }
       }
 
-      mouseEnter = function(key) {
+      mouseEnter = key => {
         if (!searched) tip.show(key);
 
         d3.selectAll("line").remove();
@@ -535,26 +530,29 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
               .attr("x2", facultyNodes[faculty].x)
               .attr("y2", facultyNodes[faculty].y)
               .style("stroke", "#E0E0E0")
-              .style("stroke-width", function(d) {
+              .style("stroke-width", d => {
                 return lineScale(key[faculty]);
               });
            })
 
           // TODO: Reduce the opacity of all the nodes except the selected node and the department nodes
           d3.selectAll(".keyword")
-            .style("opacity", 0.2);
+            .style("opacity", d => {
+              // if (d.type != 'focus') return 0.2;
+              if (d.keyword != key.keyword) return 0.2;
+              else return 1;
+            });
           d3.selectAll(".keyword-text")
             .style("opacity", d => {
-                if (d.keyword == key.keyword)
-                  return 1;
-                  else return 0;
+                if (d.keyword == key.keyword || d.type == 'focus') return 1;
+                else return 0;
             });
 
           if (key.total == 0) d3.selectAll("line").remove();
         }
       }
 
-      mouseLeave = function(bubble) {
+      mouseLeave = bubble => {
         searched = false;
         searchedKeyword = null;
 
@@ -614,39 +612,44 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     // Tincy rotation
     var speed = 0;
     // d3.timer(function() {
-    //   svg.style("transform", "rotate(" + speed + "deg)");
+    //   svg.style("transform", `rotate(${speed}deg)`);
     //   speed -= .0125;
     // });
 
     var paused = false;
+    var stopped = false;
+    var toYear = 2009;
+    var i = 0;
+    var delay = 0;
 
-    $('#play').click(function(d) {
+    $('#play').click(d => {
       brushed = false;
       paused = false;
+      if (stopped) {
+        stopped = false;
+        i = 0;
+        toYear = 2009;
+      }
       $('#pause').show();
       $('#play').hide();
       animate();
     });
 
-    $('#pause').click(function(d) {
+    $('#pause').click(d => {
       paused = true;
       $('#play').show();
       $('#pause').hide();
     });
 
-    var toYear = 2009;
-    var i = 0;
-    var delay = 0;
-
     function animate() {
       setTimeout(function () {
-        if (toYear <= maximumYear && !paused) {
+        if (toYear <= maximumYear && !paused && !stopped) {
           d3.select(".brush").transition().call(brush.move, [0, i += width / 8]);
           from = 2008;
           to = toYear++;
           restart();
 
-          delay = 2500;
+          delay = 2000;
           animate();
         }
       }, delay);
@@ -663,6 +666,10 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     function brushed() {
       if (!d3.event.sourceEvent) return; // Only transition after input.
       if (!d3.event.selection) return; // Ignore empty selections.
+
+      stopped = true;
+      $('#pause').hide();
+      $('#play').show();
 
       if (from == 0 && to == 0) {
         from = x1 = minimumYear;
@@ -697,7 +704,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     }
 
     function snapBrush() {
-      // TODO: Rework on this?
       if (!d3.event.sourceEvent) return; // Only transition after input.
       if (!d3.event.selection) return; // Ignore empty selections.
 
@@ -759,24 +765,14 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           nodes.push(node);
         }
 
-        var othersNodeId = 9999;
-
-        var addLink = function(source, target) {
+        var addLink = (source, target) => {
           var found = false;
 
           if (links.length != 0) {
             links.forEach(link => {
               if (link.source == source && link.target == target) {
                 found = true; // Link already exists.
-
-                if (target == othersNodeId) {
-                  // console.log(othersNodeId)
-                  // console.log(link.value);
-                  // link.value = 26;
-                  link.value = link.value + 1;
-                } else {
-                  link.value = link.value + 1;
-                }
+                link.value = link.value + 1;
               }
             });
 
@@ -824,36 +820,57 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           });
         }
 
-        var finalRelators = [];
+        console.log(uniqueRelators);
 
-        nodes.forEach(node => {
-          if (uniqueRelators.includes(node.name)) {
-            // TODO: If unique relators.length > something
-            links.forEach(link => {
-              if (link.target == node.node) {
-                if (link.value != 1) finalRelators.push(node.name);
-              }
-            });
-          }
-        });
+        if (uniqueRelators.length >= 20) {
+          nodes.forEach((node, index) => {
+            if (uniqueRelators.includes(node.name)) {
+              links.forEach(link => {
+                if (link.target == node.node && link.value == 1) {
+                  relator[relator.indexOf(node.name)] = 'others';
+                }
+              });
+            }
+          });
+        }
 
-        allNodes = chosenKeyword.concat(uniqueLanguages, uniqueDegreeTypes, uniqueSchools, finalRelators);
-        othersNodeId = allNodes.length;
+        console.log(relator.length);
+
+        if (uniqueRelators.length >= 10) {
+
+        }
+
+        // else if (uniqueRelators.length > 20) {
+        //     nodes.forEach((node, index) => {
+        //       if (uniqueRelators.includes(node.name)) {
+        //         links.forEach(link => {
+        //           if (link.target == node.node && (link.value == 1 || link.value == 2))
+        //             relator[relator.indexOf(node.name)] = 'others';
+        //         });
+        //       }
+        //     });
+        // }
+
+        allNodes = chosenKeyword.concat(uniqueLanguages, uniqueDegreeTypes, uniqueSchools, Array.from(new Set(relator)));
         nodes = [];
 
         // Each of these unique values are nodes
         for (var i = 0; i < allNodes.length; i++) {
           var node = {
             "node": i,
-            "name": allNodes[i]
+            "name": titleCase(allNodes[i])
           };
           nodes.push(node);
         }
 
-        nodes.push({
-          "node": othersNodeId,
-          "name":"others"
-        });
+        function titleCase(string) {
+          return string.replace(/\w\S*/g, word => {
+            return word == 'del' || word == 'degli' || word == 'della' || word == 'delle' || word == 'per' || word == 'il'
+              || word == 'di' || word == 'dei' || word == 'e' || word == 'i' || word == 'ii' || word == 'iii' || word == 'iv'
+              || word == 'v' || word == 'vi' || word == 'for'
+              ? word : word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
+          });
+        }
 
         // Create links again
         links = [];
@@ -861,16 +878,14 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           nodes.forEach(sourceNode => {
             nodes.forEach(targetNode => {
               // Check for a link between the source and the target nodes
-              if (sourceNode.name == keyword_node[thesis] && targetNode.name == language[thesis]) {
+              if (sourceNode.name.toLowerCase() == keyword_node[thesis] && targetNode.name.toLowerCase() == language[thesis]) {
                 addLink(sourceNode.node, targetNode.node);
-              } else if (sourceNode.name == language[thesis] && targetNode.name == degree_type[thesis]) {
+              } else if (sourceNode.name.toLowerCase() == language[thesis] && targetNode.name.toLowerCase() == degree_type[thesis]) {
                 addLink(sourceNode.node, targetNode.node);
-              } else if (sourceNode.name == degree_type[thesis] && targetNode.name == school[thesis]) {
+              } else if (sourceNode.name.toLowerCase() == degree_type[thesis] && targetNode.name.toLowerCase() == school[thesis]) {
                 addLink(sourceNode.node, targetNode.node);
-              } else if (sourceNode.name == school[thesis] && targetNode.name == relator[thesis]) {
+              } else if (sourceNode.name.toLowerCase() == school[thesis] && targetNode.name.toLowerCase() == relator[thesis]) {
                 addLink(sourceNode.node, targetNode.node);
-              } else if (sourceNode.name == school[thesis] && targetNode.name == "others") {
-                addLink(sourceNode.node, othersNodeId);
               }
             });
           });
@@ -907,8 +922,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom)
           .append("g")
-          .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
+          .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
         d3.selectAll(".visualisation svg").attr("id", "alluvial_chart");
 
@@ -922,6 +936,7 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
         var designPercent = (bubble.d/bubble.total) * window.innerWidth;
         var engineeringPercent = (bubble.e/bubble.total) * window.innerWidth;
 
+        // Frequency Bar
         var bars = [
           {x: 0, width: architecturePercent, color: colors.a, label: "Architecture"},
           {x: architecturePercent, width: designPercent, color: colors.d, label: "Design"},
@@ -1006,10 +1021,14 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .enter().append("path")
           .attr("class", "link")
           .attr("d", path)
+          .attr("id", (link, index) => {
+            link.id = index;
+            return "link-" + index;
+          })
           .style("stroke-width", link => {
             return Math.max(1, link.dy);
           })
-          .sort(function(a, b) {
+          .sort((a, b) => {
             return b.dy - a.dy;
           });
 
@@ -1029,23 +1048,62 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
               link.target.name + "\n" + format(link.value);
           });
 
+        function highlightLinks(node, i) {
+          var remainingNodes = [],
+          	nextNodes = [];
+
+          var strokeOpacity = 0;
+          if(d3.select(this).attr("data-clicked") == "1") {
+          	d3.select(this).attr("data-clicked", "0");
+          	strokeOpacity = 0.2;
+          } else {
+          	d3.select(this).attr("data-clicked", "1");
+          	strokeOpacity = 0.5;
+          }
+
+          var traverse = [{
+          	linkType: "sourceLinks",
+          	nodeType: "target"
+          }, {
+          	linkType: "targetLinks",
+          	nodeType: "source"
+          }];
+
+          traverse.forEach(step => {
+          	node[step.linkType].forEach(link => {
+          		remainingNodes.push(link[step.nodeType]);
+          		d3.select("#link-" + link.id).style("stroke-opacity", strokeOpacity);
+          	});
+
+          	while(remainingNodes.length) {
+          		nextNodes = [];
+          		remainingNodes.forEach(node => {
+          			node[step.linkType].forEach(link => {
+          				nextNodes.push(link[step.nodeType]);
+          				d3.select("#link-" + link.id).style("stroke-opacity", strokeOpacity);
+          			});
+          		});
+
+          		remainingNodes = nextNodes;
+          	}
+          });
+        }
+
         // add in the nodes
         var node = svg.append("g").selectAll("node")
           .data(graph.nodes)
           .enter().append("g")
           .attr("class", "node")
           .attr("transform", node => {
-            return "translate(" + node.x + "," + node.y + ")";
+            return `translate(${node.x}, ${node.y})`;
           })
+          .on("click", highlightLinks)
           .call(d3.drag()
             .subject(node => {
               return node;
             })
-            .on("start", node => {
-              this.parentNode.appendChild(this);
-            })
-            .on("drag", dragmove)
-          );
+            .on("drag", dragNode)
+          )
 
         // add the rectangles for the nodes
         node.append("rect")
@@ -1055,26 +1113,26 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .attr("width", sankey.nodeWidth())
           .style("fill", node => {
             // return d.color = color(d.name.replace(/ .*/, ""));
-            if (uniqueDegreeTypes.includes(node.name)) {
+            if (uniqueDegreeTypes.includes(node.name.toLowerCase())) {
               return d3.rgb('#00E5FF');
-            } else if (uniqueSchools.includes(node.name)) {
+            } else if (uniqueSchools.includes(node.name.toLowerCase())) {
               return d3.rgb('#F50057');
-            } else if (uniqueLanguages.includes(node.name)) {
+            } else if (uniqueLanguages.includes(node.name.toLowerCase())) {
               return d3.rgb('#FFC400');
-            } else if (uniqueRelators.includes(node.name) || node.name == 'others') {
+            } else if (uniqueRelators.includes(node.name.toLowerCase()) || node.name.toLowerCase() == 'others') {
               return d3.rgb('#76FF03');
             } else {
               return d3.rgb('#FF3D00');
             }
           })
           .style("stroke", node => {
-            if (uniqueDegreeTypes.includes(node.name)) {
+            if (uniqueDegreeTypes.includes(node.name.toLowerCase())) {
               return d3.rgb('#00E5FF');
-            } else if (uniqueSchools.includes(node.name)) {
+            } else if (uniqueSchools.includes(node.name.toLowerCase())) {
               return d3.rgb('#F50057');
-            } else if (uniqueLanguages.includes(node.name)) {
+            } else if (uniqueLanguages.includes(node.name.toLowerCase())) {
               return d3.rgb('#FFC400');
-            } else if (uniqueRelators.includes(node.name) || node.name == 'others') {
+            } else if (uniqueRelators.includes(node.name.toLowerCase()) || node.name.toLowerCase() == 'others') {
               return d3.rgb('#76FF03');
             } else {
               return d3.rgb('#FF3D00');
@@ -1105,13 +1163,10 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           .attr("text-anchor", "start");
 
         // the function for moving the nodes
-        function dragmove(d) {
+        function dragNode(d) {
           d3.select(this)
             .attr("transform",
-              "translate(" +
-              d.x + "," +
-              (d.y = Math.max(
-                0, Math.min(height - d.dy, d3.event.y))) + ")");
+              `translate(${d.x}, ${(d.y = Math.max(0, Math.min(height - d.dy, d3.event.y)))})`);
           sankey.relayout();
           link.attr("d", path);
         }
@@ -1124,162 +1179,31 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
     // TODO: complete this
   }
 
-  exploreRelators = function() {
-    navigateTo(3);
-  }
-
-  function showRelators() {
-    var graph = { nodes: [], links: []};
-
-    var relatorSize = d3.scaleSqrt()
-        .domain([0, 1000])
-        .range([0, 80]);
-
-    // Push the middle node
-    graph.nodes.push({
-      name: exploringKeyword,
-      id: 40
-    });
-
-    _relators.forEach(function(relator, index) {
-      graph.nodes.push({
-        name: relator.name,
-        id: size(relator.size) + 5
-      });
-
-      graph.links.push({
-        source: 0,
-        target: index + 1
-      });
-    });
-
-    var svg = d3.select("body").append("svg")
-      .attr("width", width)
-      .attr("height", height);
-
-    d3.selectAll("body svg").attr("id", "explore_keyword");
-
-    var simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().distance(window.innerHeight * 0.2))
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(width / 2, height / 2))
-
-    var link = svg.append("g")
-      .attr("class", "links")
-      .selectAll("line")
-      .data(graph.links)
-      .enter()
-      .append("line")
-      .attr("stroke", "#E0E0E0")
-
-    var node = svg.append("g")
-      .attr("class", "nodes")
-      .selectAll("circle")
-      .data(graph.nodes)
-      .enter().append("circle")
-        .attr("r", node => {
-          if (node.name == exploringKeyword) return 50;
-          return relatorSize(node.id);
-        })
-        .attr("fill", "#1DE9B6")
-        .call(d3.drag()
-          .on("start", dragstarted)
-          .on("drag", dragged)
-          .on("end", dragended));
-
-    var text = svg.append("g")
-      .attr("class", "text")
-      .selectAll("text")
-      .data(graph.nodes)
-      .enter()
-        .append("text")
-        .attr("dx", node => { node.x; })
-        .attr("dy", node => { node.y; })
-        .attr("font-family", "Lato")
-        .text(node => { return node.name; })
-        .style("fill", d => {
-          if (d.name == exploringKeyword) return "#212121";
-          else return "#E0E0E0";
-        });
-
-    var ticked = function() {
-      link
-        .attr("x1", function(link) {
-          return link.source.x;
-        })
-        .attr("y1", function(link) {
-          return link.source.y;
-        })
-        .attr("x2", function(link) {
-          return link.target.x;
-        })
-        .attr("y2", function(link) {
-          return link.target.y;
-        });
-
-      node
-        .attr("cx", function(node) {
-          return node.x;
-        })
-        .attr("cy", function(node) {
-          return node.y;
-        });
-
-      text
-        .attr("dx", function(text) {
-          if (text.name == exploringKeyword) return text.x - 20;
-          else return text.x + 10;
-        })
-        .attr("dy", function(text) {
-          return text.y + 5;
-        });
-    }
-
-    simulation
-      .nodes(graph.nodes)
-      .on("tick", ticked);
-
-    simulation.force("link")
-      .links(graph.links);
-
-    function dragstarted(d) {
-      if(!d3.event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-
-    function dragged(d) {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
-    }
-
-    function dragended(d) {
-      if(!d3.event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
-  }
-
   function navigateTo(navigate, bubble) {
     keywords = null;
     d3.select('#forceLayout').remove();
     d3.select('#timeline svg').remove();
     $('#searchResults').hide();
+    $('.logo').hide();
     $('#play').hide();
+    $('#title').show();
     $('#pause').hide();
     $('#explore_relators').hide();
     $('#explore_theses').hide();
     switch (navigate) {
       case 0:
+        $('#title').text('Polimatters').css("font-size", "75px");
         currentPage = 0;
         $(".visualisation").css({ position: 'absolute' });
         $('#searchbar').hide();
         $('#alluvial_legend').hide();
+        $('.logo').show();
         showHome();
         d3.select('#frequency_bar').remove();
         d3.select('#tooltip').remove();
         break;
       case 1:
+        $('#title').text('The keywords used in 20.277 theses of Politecnico di Milano').css("font-size", "45px");
         currentPage = 1;
         $('#searchbar').show();
         $(".visualisation").css({ position: 'absolute' });
@@ -1305,6 +1229,8 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           $("#searchResults").empty();
         break;
       case 2:
+        // $('#title').text(bubble.keyword).css("font-size", "45px");
+        $('#title').hide();
         currentPage = 2;
         $(".visualisation").css({ position: 'relative' });
         d3.select('#tooltip').remove();
@@ -1322,14 +1248,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
           exploreKeyword(bubble);
         }
         break;
-      case 3:
-        currentPage = 3;
-        d3.select('#frequency_bar').remove();
-        $('#alluvial_legend').hide();
-        d3.select('#alluvial_chart').remove();
-        $(".visualisation").css({ position: 'absolute' });
-        showRelators();
-        break;
     }
   }
 
@@ -1339,10 +1257,6 @@ firebase.database().ref('/keywords').orderByChild("total").once('value', snapsho
       navigateTo(0);
     } else if (currentPage == 2) {
       navigateTo(1);
-    } else if (currentPage == 3) {
-      navigateTo(2, _exploringKeyword); // TODO: Add dynamic value
-    } else if (currentPage == 4) {
-      // navigateTo(3, _exploringKeyword); // TODO: Add dynamic value
     }
   });
 });
@@ -1368,7 +1282,7 @@ function showTheses() {
   });
 }
 
-$('#search_clear').click(function(d) {
+$('#search_clear').click(d => {
   mouseLeave();
   $('#search_query').val('');
   $('#searchResults').hide();
@@ -1443,35 +1357,6 @@ function search() {
               searchedKeywordObject = year_node;
 
               restart();
-
-              // faculties.forEach(faculty => {
-              //   // Figure out what faculties a keyword belongs to
-              //   var multiplier = parseFloat(schools[faculty] / totalOccurrence);
-              //   upX += multiplier * facultyNodes[faculty].x;
-              //   upY += multiplier * facultyNodes[faculty].y;
-              //   colorRed += multiplier * d3.color(colors[faculty]).r;
-              //   colorGreen += multiplier * d3.color(colors[faculty]).g;
-              //   colorBlue += multiplier * d3.color(colors[faculty]).b;
-              //   down += multiplier;
-              // });
-
-              // if (totalOccurrence > 0) {
-              //   keyword.total = totalOccurrence; // Come on :/
-              //   keyword.positionX = upX / down;
-              //   keyword.positionY = upY / down;
-              //   keyword.a = schools.a;
-              //   keyword.d = schools.d;
-              //   keyword.e = schools.e;
-              //   let color = d3.rgb(colorRed, colorGreen, colorBlue);
-              //   let lightness = 1 / Math.sqrt(Math.pow(keyword.positionX - center.x, 2) + Math.pow(keyword.positionY - center.y, 2));
-              //   keyword.color = color.brighter(lightness / 0.0080);
-              //
-              //   bubbles = bubbles.concat(keyword);
-              //
-              //   console.log(keyword);
-              //
-              //   mouseEnter(keyword);
-              // }
             });
           }
         }));
