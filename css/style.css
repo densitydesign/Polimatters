@@ -35,17 +35,23 @@ body {
   color: #00FFCA;
 }
 
+.preloader {
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 40%;
+}
+
 #polimi_bubble {
-  /*
-  -webkit-animation: pulse 3s ease-out;
+  /*-webkit-animation: pulse 3s ease-out;
   -moz-animation: pulse 3s ease-out;
-  animation: pulse 3s ease-out;
-  -webkit-animation-iteration-count: infinite;
+  animation: pulse 3s ease-out;*/
+  /*-webkit-animation-iteration-count: infinite;
   -moz-animation-iteration-count: infinite;
-  animation-iteration-count: infinite;
-  */
+  animation-iteration-count: infinite;*/
   z-index: 1;
-  opacity: 1;
+  /*opacity: 0;*/
 }
 
 #back {
@@ -410,6 +416,11 @@ ul li:hover {
   -moz-border-radius: 30px;
   border-radius: 30px;
   background-color: #716f42;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
   z-index: 10;
 }
 
