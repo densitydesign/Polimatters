@@ -1,0 +1,471 @@
+body {
+  background: #212121;
+  max-height: 100%;
+  overflow: hidden;
+  font-family: 'Lato', sans-serif;
+}
+
+.title {
+  font-family: 'Mukta Vaani', sans-serif;
+  font-weight: 300;
+  font-size: 75px;
+  margin: 50px;
+  text-align: center;
+  color: #E0E0E0;
+}
+
+.intro {
+  font-family: 'Lato', sans-serif;
+  font-size: 18px;
+  color: #E0E0E0;
+  text-align: center;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.yellow {
+  color: #EEFF14;
+}
+
+.red {
+  color: #FF3054;
+}
+
+.cyan {
+  color: #00FFCA;
+}
+
+.preloader {
+  right: 0;
+  left: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 40%;
+}
+
+#polimi_bubble {
+  /*-webkit-animation: pulse 3s ease-out;
+  -moz-animation: pulse 3s ease-out;
+  animation: pulse 3s ease-out;*/
+  /*-webkit-animation-iteration-count: infinite;
+  -moz-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;*/
+  z-index: 1;
+  /*opacity: 0;*/
+}
+
+#back {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #E0E0E0;
+  font-size: 25px;
+  position: absolute;
+  display: none;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  margin: 75px;
+}
+
+.toggle_language a {
+  color: #E0E0E0;
+  position: absolute;
+  bottom: 15px;
+  right: 25px;
+  font-weight: bold;
+}
+
+.visualisation {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.logo {
+  position: absolute;
+  bottom: 0;
+  margin: 25px;
+}
+
+.logo img {
+  padding-right: 35px;
+}
+
+.credits {
+  position: absolute;
+  right: 20px;
+  bottom: 25px;
+  width: 30%;
+  text-align: center;
+  color: #E0E0E0;
+}
+
+.credits h4 {
+  font-weight: bold;
+}
+
+/* Force Layout */
+.searchbar {
+  display: none;
+  width: 20%;
+  position: absolute;
+  right: 30px;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.searchbar input {
+  color: #E0E0E0;
+  overflow: hidden;
+  font-size: 20px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.searchbar #search_clear {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #E0E0E0;
+  z-index: 9999;
+  font-size: 25px;
+  float: right;
+}
+
+.searchbar ul {
+  background: #E0E0E0;
+  padding: 5px;
+  max-height: 600px;
+  width: 100%;
+  left: 0;
+  right: 0;
+  list-style-type: none;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 9999;
+  color: #212121;
+  position: absolute;
+  text-align: left;
+  overflow: scroll;
+  /*-webkit-filter: blur(10px);
+  -moz-filter: blur(10px);
+  -o-filter: blur(10px);
+  -ms-filter: blur(10px);
+  filter: blur(10px);*/
+}
+
+.algolia-autocomplete {
+  width: 80%;
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 100%;
+  min-height: 30px;
+  text-indent: 10px;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 120%;
+  text-align: left;
+  padding-left: 15px;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #E0E0E0;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+ul li {
+  background: #E0E0E0;
+  margin: 5px;
+}
+
+ul li:hover {
+  cursor: pointer;
+}
+
+.brushAxis line {
+  stroke: #E0E0E0;
+  shape-rendering: crispEdges;
+}
+
+.brushAxis path {
+  stroke: #E0E0E0;
+  stroke-width: 2px;
+}
+
+.brushAxis text {
+  fill: #E0E0E0;
+}
+
+.d3-tip {
+  line-height: 1;
+  padding: 6px;
+  background: #424242;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.timeline {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  bottom: 25px;
+  width: 75%;
+  text-align: center;
+  color: #E0E0E0;
+}
+
+#play {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #E0E0E0;
+  font-size: 25px;
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  right: 10%;
+  display: none;
+  margin-bottom: 65px;
+}
+
+#pause {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #E0E0E0;
+  font-size: 25px;
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  right: 10%;
+  display: none;
+  margin-bottom: 65px;
+}
+
+/* Creates a small triangle extender for the tooltip TODO: See why this remains
+  static when navigated to another page
+*/
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips specifically */
+.d3-tip.n:after {
+  margin: -2px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+/* Alluvial Chart */
+.frequency_bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.background.bar {
+ fill: #ccc;
+}
+
+.foreground.bar {
+ fill: steelblue;
+}
+
+.brush-handle {
+ fill: #eee;
+ stroke: #666;
+}
+
+.alluvial_legend {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  left: 0;
+  right: 0;
+  bottom: 25px;
+  text-align: center;
+  color: #E0E0E0;
+  display: none;
+}
+
+.explore_relators {
+  width: 150px;
+  display: none;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 10px;
+}
+
+.explore_theses {
+  width: 150px;
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  margin: 10px;
+}
+
+#thesesModal {
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: transparent;
+  width: 70%;
+}
+
+.modal-body {
+  height: 600px;
+}
+
+#thesesResults {
+  padding: 5px;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  right: 0;
+  list-style-type: none;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 9999;
+  color: #212121;
+  position: absolute;
+  text-align: left;
+  overflow: scroll;
+}
+
+#thesesResults li {
+  background: #FFF;
+}
+
+#chart {
+  z-index: 1;
+}
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+}
+
+.link {
+  fill: none;
+  stroke: #F5F5F5;
+  stroke-opacity: .2;
+}
+
+.link:hover {
+  stroke-opacity: .5;
+}
+
+::-webkit-input-placeholder { /* Chrome */
+  color: #E0E0E0;
+}
+:-ms-input-placeholder { /* IE 10+ */
+  color: #E0E0E0;
+}
+::-moz-placeholder { /* Firefox 19+ */
+  color: #E0E0E0;
+  opacity: 1;
+}
+:-moz-placeholder { /* Firefox 4 - 18 */
+  color: #E0E0E0;
+  opacity: 1;
+}
+
+.pulse {
+  width: 10px;
+  height: 10px;
+  border: 5px solid #f7f14c;
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+  border-radius: 30px;
+  background-color: #716f42;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 10;
+}
+
+@-moz-keyframes pulse {
+ 0% {
+    -moz-transform: scale(0);
+    opacity: 0.0;
+ }
+ 25% {
+    -moz-transform: scale(0);
+    opacity: 0.1;
+ }
+ 50% {
+    -moz-transform: scale(0.1);
+    opacity: 0.3;
+ }
+ 75% {
+    -moz-transform: scale(0.5);
+    opacity: 0.5;
+ }
+ 100% {
+    -moz-transform: scale(1);
+    opacity: 0.0;
+ }
+}
+
+@-webkit-keyframes "pulse" {
+ 0% {
+    -webkit-transform: scale(0);
+    opacity: 0.0;
+ }
+ 25% {
+    -webkit-transform: scale(0);
+    opacity: 0.1;
+ }
+ 50% {
+    -webkit-transform: scale(0.1);
+    opacity: 0.3;
+ }
+ 75% {
+    -webkit-transform: scale(0.5);
+    opacity: 0.5;
+ }
+ 100% {
+    -webkit-transform: scale(1);
+    opacity: 0.0;
+ }
+}

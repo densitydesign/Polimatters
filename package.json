@@ -1,0 +1,25 @@
+{
+  "name": "polimatters",
+  "version": "0.2.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vathsav/polimatters.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vathsav/polimatters/issues"
+  },
+  "homepage": "https://github.com/vathsav/polimatters#readme",
+  "dependencies": {
+    "quiver-firebase-search": "^1.0.6",
+    "firebase-admin": "^4.1.1",
+    "firebase-functions": "^0.5.1",
+    "algoliasearch": "^3.10.2"
+  }
+}

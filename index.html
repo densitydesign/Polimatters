@@ -7,79 +7,229 @@
 
     <!-- Social Networks meta tags -->
     <meta property="og:title" content="Polimatters: how Politecnico's students describe their theses?">
-    <meta property="og:description" content="We collected and visualized the top 500 keywords of the 20.277 master theses discussed between 2010 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research.">
+    <meta property="og:description" content="We collected and visualized the keywords used in the 20.277 master theses discussed between 2008 and 2016. The result is a picture of the most relevant topics at the crossroad between teaching and research.">
     <meta property="og:image" content="http://labs.densitydesign.org/conferenza2016/img/polimatters-cover.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@densitydesign">
 
     <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
-    <link rel="stylesheet" media="screen" href="js/jquery-ui.min.css" type="text/css">
     <link rel="icon" href="img/favicon.svg" type="image/svg+xml" sizes="32x32">
     <link rel="icon" href="img/favicon.png" type="image/gif" sizes="32x32">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Mukta+Vaani:300" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Didact+Gothic" rel="stylesheet">
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/hk-grotesk" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Lora:400" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal-bs3patch.min.css">
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.0.1/spin.min.js'></script>
 
     <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+        (function(i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function() {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
-      ga('create', 'UA-5816319-6', 'auto');
-      ga('send', 'pageview');
-
+        ga('create', 'UA-5816319-6', 'auto');
+        ga('send', 'pageview');
     </script>
 </head>
 
 <body>
-
-    <div class="container header-box" role="heading">
-        <h1 class="header-title title">Polimatters</h1>
-        <p class="header-copy copy">At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the <span class="keywords">top 500 keywords</span> of the <span class="theses">20.277 master theses</span> discussed <span class="years">between 2010 and 2016</span>. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
-        <div class="header-interaction left">
-            <a href="faculties.htm"><img src="img/keywords_faculty.svg" class="header-img" alt="icon related to faculty data"></a>
-            <div class="header-button title long">
-                <a href="faculties.htm">the three macro areas: <br/><span class="second-line">Architecture, Design, Engineering</span></a>
-            </div>
-        </div>
-        <div class="header-interaction right">
-            <a href="design.htm"><img src="img/keywords_design.svg" class="header-img" alt="icon related to design data"></a>
-            <div class="header-button title">
-                <a href="design.htm">the Design School</a>
-            </div>
-        </div>
+    <h1 class="title" id="title">Polimatters</h1>
+    <div class="intro" id="intro">
+        <p>At Politecnico di Milano research and teaching are fruitfully intertwined: research feeds the didactical activity and the classrooms often become incubators of research ideas. We collected and visualized the <span class="cyan">top keywords</span> used in the <span class="yellow">20.277 theses</span> discussed between <span class="red">2008 and 2016</span>. The result is a picture of the most relevant topics at the crossroad between teaching and research. Exploring the visualization you can see how the topics are distributed and shared among the three macro research and teaching areas in Politecnico - Architecture, Design and Engineering - and among the different degrees within the Design School.</p>
     </div>
 
-    <div class="footer">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-1 col-sm-2 col-xs-6">
-                    <a href="http://www.dipartimentodesign.polimi.it/"><img class="img-department" src="img/dip_logo.png" alt="politecnico di milano logo"></a>
-                </div>
-                <div class="col-md-1 col-sm-2 col-xs-6">
-                    <a href="http://www.densitydesign.org/"><img class="img-density" src="img/density_logo.png" alt="density design logo"></a>
-                </div>
-                <div class="col-md-4 col-sm-5 col-xs-12 col-sm-offset-1">
-                    <h4 class="credits-title title">Credits</h4>
-                    <ul class="credits-names copy">
-                        <li>Paolo Ciuccarelli <span class="role paolo">- Scientific Director</span></li>
-                        <li>Daniele Ciminieri <span class="role daniele">- Design &amp; Development</span></li>
-                        <li>Michele Invernizzi <span class="role michele">- Design &amp; Development</span></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <!-- <div class="pulse"></div> -->
+    <div class="preloader" id="preloader"></div>
+
+    <div class="visualisation" id="visualisation"></div>
+
+    <div class="toggle_language" id="toggle_language">
+      <!-- <p><a href="">IT</a></p> -->
     </div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <div class="logo">
+      <img src="img/polimi_logo.png">
+      <img src="img/density_logo.png">
+    </div>
+
+    <button class="fa fa-arrow-left" aria-hidden="true" id="back"></button>
+
+    <!-- <button class="explore_relators" id="explore_relators" onclick="exploreRelators()">Explore Relators</button> -->
+    <button type="button" class="explore_theses" id="explore_theses" onclick="showTheses()" data-toggle="modal" data-target="#thesesModal">Read Theses</button>
+
+    <!-- Modal -->
+    <div id="thesesModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">List of Theses</h4>
+          </div>
+          <div class="modal-body">
+            <ul id="thesesResults"></ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="searchbar" id="searchbar">
+      <input type="text" id="search_query" placeholder="Search">
+      <button class="fa fa-times" aria-hidden="true" id="search_clear"></button>
+
+      <div class="searchResultBackground"></div>
+      <ul id="searchResults"></ul>
+    </div>
+
+    <div class="credits" id="credits">
+      <h4>Designed and Developed by DensityDesign Research Lab</h4>
+      Paolo Ciuccarelli - Scientific Director <br>
+      Daniele Ciminieri - Design &amp; Development <br>
+      Michele Invernizzi - Design &amp; Development <br>
+      Tomasso Elli - Design &amp; Development <br>
+      Vathsav Harikrishnan - Design &amp; Development
+    </div>
+
+    <div class="timeline" id="timeline"></div>
+
+    <!-- TODO: Put the buttons within a single class and toggle it -->
+    <button class="fa fa-play" aria-hidden="true" id="play"></button>
+    <button class="fa fa-pause" aria-hidden="true" id="pause"></button>
+
+    <div class="frequency_bar"></div>
+
+    <!-- Alluvial Chart -->
+    <div class="alluvial_legend" id="alluvial_legend"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
     <script>
+        // Initialize Firebase
+        let config = {
+            apiKey: "AIzaSyAFAboe9Mj0nyMAo5Jk0iQH3ZKB8KS3z-s",
+            authDomain: "poliparser.firebaseapp.com",
+            databaseURL: "https://poliparser.firebaseio.com",
+            projectId: "poliparser",
+            storageBucket: "poliparser.appspot.com",
+            messagingSenderId: "891756668485"
+        };
+        firebase.initializeApp(config);
+    </script>
 
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/lodash/4.13.1/lodash.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.min.js"></script>
+    <script src="js/crossfilter.js"></script>
+    <script src="js/sankey.js"></script>
+    <script src="js/d3-tip.js"></script>
+    <script src="js/polimatters.js"></script>
+
+    <script type="text/javascript">
+      var client = algoliasearch("BM1OHPMZOP", "b99b3d0c2bbf178129c55cebd6117d04");
+      var index = client.initIndex('keywords');
+      autocomplete('#search_query',
+        { hint: true }, {
+            source: autocomplete.sources.hits(index, { hitsPerPage: 20 }),
+            displayKey: 'objectID',
+            templates: {
+                suggestion: function(suggestion) {
+                  return '<span>' + suggestion.objectID + '</span>'
+                }
+            }
+        }).on("autocomplete:selected", function(t, e) {
+          var word = e.objectID;
+
+          var found = false;
+          d3.selectAll(".keyword")
+            .filter(node => { return node.keyword == word; })
+            .each(node => { if (!found) { found = true; searched = true; searchedKeyword = node; }});
+
+
+          if (found) {
+            bubbles.forEach(bubble => {
+              if (bubble.keyword == searchedKeyword.keyword) {
+                mouseEnter(bubble);
+              }
+            })
+          }
+
+          if (!found) {
+            searchedKeywordObject = e;
+            searchedKeywordObject.keyword = e.objectID;
+            delete searchedKeywordObject.objectID;
+
+            var year_node = { total: 0 };
+            let chosenYears = years;
+            var occurrencesPerYear = [];
+            let multiplier = 0;
+            let upX = 0;
+            let upY = 0;
+            let down = 0;
+            let colorRed = 0;
+            let colorGreen = 0;
+            let colorBlue = 0;
+            let schools = { a: 0, d: 0, e: 0 };
+            let totalOccurrence = 0;
+
+            // Split by years
+            years.forEach(year => {
+              if (searchedKeywordObject[year]) {
+                var word = searchedKeywordObject[year];
+                year_node[year] = { a: 0, d: 0, e: 0, total: 0 }
+
+                architecture.forEach(course => {
+                  if (Object.keys(word).includes(course))
+                    year_node[year].a += word[course];
+                });
+
+                design.forEach(course => {
+                  if (Object.keys(word).includes(course))
+                    year_node[year].d += word[course];
+                });
+
+                engineering.forEach(course => {
+                  if (Object.keys(word).includes(course))
+                    year_node[year].e += word[course];
+                });
+
+                year_node.keyword = e.keyword;
+                year_node[year].keyword = e.keyword;
+                year_node[year].total = word.total;
+                year_node.total += year_node[year].total;
+              }
+            });
+
+            searchedKeywordObject = year_node;
+
+            restart();
+          }
+        });
     </script>
 </body>
 
