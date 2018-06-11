@@ -239,6 +239,8 @@
 
         var nodes = data;
 
+        console.log(nodes)
+
         var simulation = d3.forceSimulation()
             .force("x", d3.forceX().strength(.2).x(function(d) {
                 return d.destx
